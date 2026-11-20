@@ -27,6 +27,9 @@ How AI was used to build this project, and where the human decisions were made.
 
 Notes are added here as the project progresses.
 
+- Task 5: The concurrency test failed first with "Unable to start a transaction in the given time". Prisma's default 2 second wait to start a transaction is too short for a remote serverless database that may be waking up. I set explicit `maxWait` and `timeout` values in the repository instead of loosening the test, because a real user could hit the same delay.
+- Task 5: Typecheck caught a type problem that the tests did not: Zod's `.transform()` made `reason` a required key. I declared `ChangeSalaryInput` by hand with `reason` optional.
+- Task 5: Salary changes use an optimistic concurrency guard. The service reads the employee, and the repository writes only if the salary and active status are unchanged (a conditional `UPDATE ... WHERE`). Two simultaneous changes cannot both succeed, and nothing is overwritten silently. A test proves exactly one of two parallel changes wins.
 - Task 4: One repository contract (`employee-repository.contract.ts`) runs against both the in-memory fake and the Prisma repository, so the fake cannot drift from real database behavior. Duplicate emails are caught from the database unique constraint instead of check-then-insert, which avoids a race between two requests.
 - Task 4: A first test run passed in the same step that created the file under test. I could not trust which version it ran, so I reran it afterwards. Dependent steps now run one after another.
 - Task 4: I did not smoke-test the live server with a successful create, because the dev server uses the main database and would have added a stray employee to the demo data. The same flow is covered by integration tests against the test database instead.

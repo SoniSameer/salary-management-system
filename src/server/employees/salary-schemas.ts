@@ -16,4 +16,9 @@ export const changeSalarySchema = z.strictObject({
     .transform((value) => (value ? value : undefined)),
 });
 
-export type ChangeSalaryInput = z.infer<typeof changeSalarySchema>;
+// Written out by hand: Zod infers `reason` as a required key because of the
+// transform above, but callers should be free to leave it out.
+export interface ChangeSalaryInput {
+  salary: number;
+  reason?: string;
+}

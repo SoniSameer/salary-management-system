@@ -1,7 +1,12 @@
-import type { Employee } from "./employee";
+import type { Employee, SalaryRecord } from "./employee";
 import type { EmployeeRepository } from "./employee-repository";
 import type { CreateEmployeeInput, UpdateEmployeeInput } from "./employee-schemas";
 import { EmployeeNotFoundError } from "./errors";
+
+export interface EmployeeDetails {
+  employee: Employee;
+  salaryHistory: SalaryRecord[];
+}
 
 /**
  * Business rules for employees. Input is already validated by Zod at the API
@@ -26,6 +31,14 @@ export class EmployeeService {
         reason: "Starting salary",
       },
     });
+  }
+
+  /** The employee plus their full salary history, newest first. */
+  async getDetails(id: string): Promise<EmployeeDetails> {
+    const employee = await this.employees.findById(id);
+    if (!employee) throw new EmployeeNotFoundError(id);
+
+    return { employee, salaryHistory: await this.employees.listSalaryHistory(id) };
   }
 
   /** Edits profile fields only. Salary changes go through the salary service. */

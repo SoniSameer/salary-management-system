@@ -1,6 +1,17 @@
+import { employeeListQuerySchema } from "@/server/employees/employee-list";
 import { createEmployeeSchema } from "@/server/employees/employee-schemas";
 import { getEmployeeService } from "@/server/container";
 import { parseBody, toErrorResponse } from "@/server/http/api-errors";
+
+export async function GET(request: Request): Promise<Response> {
+  try {
+    const params = Object.fromEntries(new URL(request.url).searchParams);
+    const query = employeeListQuerySchema.parse(params);
+    return Response.json(await getEmployeeService().list(query));
+  } catch (error) {
+    return toErrorResponse(error);
+  }
+}
 
 export async function POST(request: Request): Promise<Response> {
   try {

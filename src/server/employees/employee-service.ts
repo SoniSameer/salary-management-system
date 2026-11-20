@@ -1,4 +1,9 @@
 import type { Employee, SalaryRecord } from "./employee";
+import type {
+  EmployeeFilterOptions,
+  EmployeeListQuery,
+  EmployeeListResult,
+} from "./employee-list";
 import type { EmployeeRepository } from "./employee-repository";
 import type { CreateEmployeeInput, UpdateEmployeeInput } from "./employee-schemas";
 import { EmployeeNotFoundError } from "./errors";
@@ -31,6 +36,16 @@ export class EmployeeService {
         reason: "Starting salary",
       },
     });
+  }
+
+  /** One page of the directory. Filtering, sorting and paging happen in the database. */
+  list(query: EmployeeListQuery): Promise<EmployeeListResult> {
+    return this.employees.list(query);
+  }
+
+  /** Values for the directory's filter dropdowns. */
+  getFilterOptions(): Promise<EmployeeFilterOptions> {
+    return this.employees.getFilterOptions();
   }
 
   /** The employee plus their full salary history, newest first. */

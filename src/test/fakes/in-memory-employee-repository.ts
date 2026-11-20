@@ -1,6 +1,11 @@
 import { randomUUID } from "node:crypto";
 import type { Employee, EmployeeProfilePatch, SalaryRecord } from "@/server/employees/employee";
-import type { EmployeeRepository, NewEmployee } from "@/server/employees/employee-repository";
+import type {
+  AppliedSalaryChange,
+  EmployeeRepository,
+  NewEmployee,
+  SalaryChange,
+} from "@/server/employees/employee-repository";
 import { EmailAlreadyExistsError } from "@/server/employees/errors";
 
 /** Test double for EmployeeRepository. Kept honest by the shared contract tests. */
@@ -72,6 +77,27 @@ export class InMemoryEmployeeRepository implements EmployeeRepository {
       .filter((record) => record.employeeId === employeeId)
       .sort((a, b) => b.effectiveAt.getTime() - a.effectiveAt.getTime())
       .map((record) => ({ ...record }));
+  }
+
+  async applySalaryChange(change: SalaryChange): Promise<AppliedSalaryChange | null> {
+    const existing = this.employees.get(change.employeeId);
+    if (!existing || !existing.isActive || existing.currentSalary !== change.expectedCurrentSalary) {
+      return null;
+    }
+
+    const updated: Employee = { ...existing, currentSalary: change.newAmount };
+    const record: SalaryRecord = {
+      id: randomUUID(),
+      employeeId: existing.id,
+      amount: change.newAmount,
+      currency: existing.currency,
+      effectiveAt: change.effectiveAt,
+      reason: change.reason,
+    };
+    this.employees.set(updated.id, updated);
+    this.salaryRecords.push(record);
+
+    return { employee: { ...updated }, record: { ...record } };
   }
 
   private assertEmailAvailable(email: string, ownerId?: string): void {

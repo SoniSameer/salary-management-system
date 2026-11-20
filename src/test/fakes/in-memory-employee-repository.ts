@@ -1,12 +1,24 @@
 import { randomUUID } from "node:crypto";
 import type { Employee, EmployeeProfilePatch, SalaryRecord } from "@/server/employees/employee";
 import type {
+  EmployeeFilterOptions,
+  EmployeeListQuery,
+  EmployeeListResult,
+} from "@/server/employees/employee-list";
+import type {
   AppliedSalaryChange,
   EmployeeRepository,
   NewEmployee,
   SalaryChange,
 } from "@/server/employees/employee-repository";
 import { EmailAlreadyExistsError } from "@/server/employees/errors";
+
+function compareValues(a: string | number | Date, b: string | number | Date): number {
+  const left = a instanceof Date ? a.getTime() : a;
+  const right = b instanceof Date ? b.getTime() : b;
+  if (left < right) return -1;
+  return left > right ? 1 : 0;
+}
 
 /** Test double for EmployeeRepository. Kept honest by the shared contract tests. */
 export class InMemoryEmployeeRepository implements EmployeeRepository {
@@ -77,6 +89,54 @@ export class InMemoryEmployeeRepository implements EmployeeRepository {
       .filter((record) => record.employeeId === employeeId)
       .sort((a, b) => b.effectiveAt.getTime() - a.effectiveAt.getTime())
       .map((record) => ({ ...record }));
+  }
+
+  async list(query: EmployeeListQuery): Promise<EmployeeListResult> {
+    const search = query.search?.toLowerCase();
+    const matching = [...this.employees.values()].filter((employee) => {
+      if (query.status === "active" && !employee.isActive) return false;
+      if (query.status === "inactive" && employee.isActive) return false;
+      if (query.country && employee.country !== query.country) return false;
+      if (query.department && employee.department !== query.department) return false;
+      if (query.jobTitle && employee.jobTitle !== query.jobTitle) return false;
+      if (query.currency && employee.currency !== query.currency) return false;
+      if (
+        search &&
+        !employee.fullName.toLowerCase().includes(search) &&
+        !employee.email.toLowerCase().includes(search)
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    const direction = query.sortOrder === "asc" ? 1 : -1;
+    matching.sort((a, b) => {
+      const byField = compareValues(a[query.sortBy], b[query.sortBy]) * direction;
+      // Same tiebreaker as the database query, so paging is stable.
+      return byField !== 0 ? byField : compareValues(a.id, b.id);
+    });
+
+    const start = (query.page - 1) * query.pageSize;
+    return {
+      items: matching.slice(start, start + query.pageSize).map((employee) => ({ ...employee })),
+      total: matching.length,
+      page: query.page,
+      pageSize: query.pageSize,
+      totalPages: Math.ceil(matching.length / query.pageSize),
+    };
+  }
+
+  async getFilterOptions(): Promise<EmployeeFilterOptions> {
+    const distinct = (pick: (employee: Employee) => string): string[] =>
+      [...new Set([...this.employees.values()].map(pick))].sort(compareValues);
+
+    return {
+      countries: distinct((employee) => employee.country),
+      departments: distinct((employee) => employee.department),
+      jobTitles: distinct((employee) => employee.jobTitle),
+      currencies: distinct((employee) => employee.currency),
+    };
   }
 
   async applySalaryChange(change: SalaryChange): Promise<AppliedSalaryChange | null> {

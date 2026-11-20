@@ -6,7 +6,8 @@ import { InMemoryEmployeeRepository } from "@/test/fakes/in-memory-employee-repo
 import { POST as deactivate } from "./[id]/deactivate/route";
 import { GET as details, PATCH as update } from "./[id]/route";
 import { POST as changeSalary } from "./[id]/salary/route";
-import { POST as create } from "./route";
+import { GET as filterOptions } from "./filter-options/route";
+import { GET as list, POST as create } from "./route";
 
 let service: EmployeeService;
 let salaryService: SalaryService;
@@ -124,6 +125,78 @@ describe("employees API", () => {
       const response = await update(jsonRequest("PATCH", { fullName: "X" }), idContext("123"));
 
       expect(response.status).toBe(400);
+    });
+  });
+
+  describe("GET /api/employees", () => {
+    const listRequest = (query: string) => new Request(`http://localhost/api/employees${query}`);
+
+    async function createNamed(fullName: string, email: string, country = "Germany") {
+      await create(jsonRequest("POST", { ...validBody, fullName, email, country }));
+    }
+
+    it("returns a page with totals", async () => {
+      await createNamed("Ada Lovelace", "ada@example.com");
+      await createNamed("Grace Hopper", "grace@example.com");
+      await createNamed("Linus T", "linus@example.com");
+
+      const response = await list(listRequest("?pageSize=2&page=2"));
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toMatchObject({
+        items: [{ fullName: "Linus T" }],
+        total: 3,
+        totalPages: 2,
+        page: 2,
+        pageSize: 2,
+      });
+    });
+
+    it("applies filters and search from the query string", async () => {
+      await createNamed("Ada Lovelace", "ada@example.com", "Germany");
+      await createNamed("Grace Hopper", "grace@example.com", "France");
+
+      const byCountry = await (await list(listRequest("?country=France"))).json();
+      const bySearch = await (await list(listRequest("?search=ADA"))).json();
+
+      expect(byCountry).toMatchObject({ total: 1, items: [{ fullName: "Grace Hopper" }] });
+      expect(bySearch).toMatchObject({ total: 1, items: [{ fullName: "Ada Lovelace" }] });
+    });
+
+    it("treats empty filter parameters as not set", async () => {
+      await createNamed("Ada Lovelace", "ada@example.com");
+
+      const response = await list(listRequest("?country=&currency=&search="));
+
+      expect(await response.json()).toMatchObject({ total: 1 });
+    });
+
+    it.each([
+      ["a page size over the cap", "?pageSize=1000"],
+      ["page zero", "?page=0"],
+      ["an unknown sort field", "?sortBy=password"],
+      ["an unknown status", "?status=deleted"],
+    ])("returns 400 for %s", async (_label, query) => {
+      const response = await list(listRequest(query));
+
+      expect(response.status).toBe(400);
+      expect(await response.json()).toMatchObject({ error: { code: "validation_failed" } });
+    });
+  });
+
+  describe("GET /api/employees/filter-options", () => {
+    it("returns the distinct values for the filters", async () => {
+      await create(jsonRequest("POST", validBody));
+
+      const response = await filterOptions();
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({
+        countries: ["Germany"],
+        departments: ["Engineering"],
+        jobTitles: ["Software Engineer"],
+        currencies: ["EUR"],
+      });
     });
   });
 

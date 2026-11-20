@@ -60,6 +60,45 @@ describe("EmployeeService", () => {
     });
   });
 
+  describe("list and filter options", () => {
+    it("returns a page of employees with totals", async () => {
+      await service.create(validInput);
+      await service.create({ ...validInput, email: "grace@example.com", fullName: "Grace Hopper" });
+      await service.create({ ...validInput, email: "linus@example.com", fullName: "Linus T" });
+
+      const result = await service.list({
+        status: "active",
+        sortBy: "fullName",
+        sortOrder: "asc",
+        page: 1,
+        pageSize: 2,
+      });
+
+      expect(result.items.map((e) => e.fullName)).toEqual(["Ada Lovelace", "Grace Hopper"]);
+      expect(result).toMatchObject({ total: 3, totalPages: 2, page: 1, pageSize: 2 });
+    });
+
+    it("lists deactivated employees only when asked", async () => {
+      const created = await service.create(validInput);
+      await service.deactivate(created.id);
+      const query = { sortBy: "fullName", sortOrder: "asc", page: 1, pageSize: 25 } as const;
+
+      expect((await service.list({ ...query, status: "active" })).total).toBe(0);
+      expect((await service.list({ ...query, status: "all" })).total).toBe(1);
+    });
+
+    it("returns filter options", async () => {
+      await service.create(validInput);
+
+      expect(await service.getFilterOptions()).toEqual({
+        countries: ["Germany"],
+        departments: ["Engineering"],
+        jobTitles: ["Software Engineer"],
+        currencies: ["EUR"],
+      });
+    });
+  });
+
   describe("getDetails", () => {
     it("returns the employee with their salary history, newest first", async () => {
       const created = await service.create(validInput);

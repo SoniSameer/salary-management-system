@@ -1,7 +1,13 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { EmailAlreadyExistsError, EmployeeNotFoundError } from "@/server/employees/errors";
+import {
+  ConcurrentSalaryChangeError,
+  EmailAlreadyExistsError,
+  EmployeeInactiveError,
+  EmployeeNotFoundError,
+  SalaryUnchangedError,
+} from "@/server/employees/errors";
 import { InvalidJsonError, parseBody, toErrorResponse } from "./api-errors";
 
 async function readJson(response: Response): Promise<unknown> {
@@ -45,6 +51,17 @@ describe("toErrorResponse", () => {
     expect(await readJson(response)).toMatchObject({
       error: { code: "email_already_exists", fields: { email: [expect.any(String)] } },
     });
+  });
+
+  it.each([
+    ["a deactivated employee", new EmployeeInactiveError("abc"), "employee_inactive"],
+    ["an unchanged salary", new SalaryUnchangedError(70000), "salary_unchanged"],
+    ["a concurrent change", new ConcurrentSalaryChangeError("abc"), "salary_changed_concurrently"],
+  ])("maps %s to 409 with its own code", async (_label, error, code) => {
+    const response = toErrorResponse(error);
+
+    expect(response.status).toBe(409);
+    expect(await readJson(response)).toMatchObject({ error: { code } });
   });
 
   it("hides the details of unexpected errors", async () => {

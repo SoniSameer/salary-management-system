@@ -1,5 +1,11 @@
 import { z } from "zod";
-import { EmailAlreadyExistsError, EmployeeNotFoundError } from "@/server/employees/errors";
+import {
+  ConcurrentSalaryChangeError,
+  EmailAlreadyExistsError,
+  EmployeeInactiveError,
+  EmployeeNotFoundError,
+  SalaryUnchangedError,
+} from "@/server/employees/errors";
 
 export class InvalidJsonError extends Error {
   constructor() {
@@ -51,6 +57,26 @@ export function toErrorResponse(error: unknown): Response {
       code: "email_already_exists",
       message: "An employee with this email already exists",
       fields: { email: ["This email is already in use"] },
+    });
+  }
+
+  if (error instanceof EmployeeInactiveError) {
+    return errorResponse(409, {
+      code: "employee_inactive",
+      message: "This employee is deactivated, so their salary cannot be changed",
+    });
+  }
+  if (error instanceof SalaryUnchangedError) {
+    return errorResponse(409, {
+      code: "salary_unchanged",
+      message: "The new salary is the same as the current salary",
+      fields: { salary: ["Enter a different amount"] },
+    });
+  }
+  if (error instanceof ConcurrentSalaryChangeError) {
+    return errorResponse(409, {
+      code: "salary_changed_concurrently",
+      message: "This employee was changed by someone else. Reload and try again",
     });
   }
 

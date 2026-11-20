@@ -5,12 +5,21 @@ import {
   type SalaryRecord as SalaryRecordRow,
 } from "@/generated/prisma/client";
 import type { Employee, EmployeeProfilePatch, SalaryRecord } from "./employee";
-import type { EmployeeRepository, NewEmployee } from "./employee-repository";
+import type {
+  AppliedSalaryChange,
+  EmployeeRepository,
+  NewEmployee,
+  SalaryChange,
+} from "./employee-repository";
 import { EmailAlreadyExistsError } from "./errors";
 
 // Prisma error codes: https://www.prisma.io/docs/orm/reference/error-reference
 const UNIQUE_VIOLATION = "P2002";
 const RECORD_NOT_FOUND = "P2025";
+
+// Prisma waits 2s to start a transaction by default. A serverless database
+// that has been idle can take longer to wake, so allow more time before failing.
+const TRANSACTION_OPTIONS = { maxWait: 10_000, timeout: 15_000 } as const;
 
 function hasCode(error: unknown, code: string): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === code;
@@ -103,6 +112,38 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
       data: { isActive: false, deactivatedAt: at },
     });
     return this.findById(id);
+  }
+
+  async applySalaryChange(change: SalaryChange): Promise<AppliedSalaryChange | null> {
+    return this.prisma.$transaction(async (tx) => {
+      // The WHERE clause is the concurrency guard. If another request changed
+      // the salary or deactivated the employee since we read it, no row
+      // matches, nothing is written and we return null. Two simultaneous
+      // changes cannot both match, because the first one moves currentSalary.
+      const { count } = await tx.employee.updateMany({
+        where: {
+          id: change.employeeId,
+          isActive: true,
+          currentSalary: change.expectedCurrentSalary,
+        },
+        data: { currentSalary: change.newAmount },
+      });
+      if (count === 0) return null;
+
+      const employee = await tx.employee.findUniqueOrThrow({ where: { id: change.employeeId } });
+      // If this insert fails the transaction rolls back the salary update too.
+      const record = await tx.salaryRecord.create({
+        data: {
+          employeeId: employee.id,
+          amount: change.newAmount,
+          currency: employee.currency,
+          effectiveAt: change.effectiveAt,
+          reason: change.reason,
+        },
+      });
+
+      return { employee: toEmployee(employee), record: toSalaryRecord(record) };
+    }, TRANSACTION_OPTIONS);
   }
 
   async listSalaryHistory(employeeId: string): Promise<SalaryRecord[]> {

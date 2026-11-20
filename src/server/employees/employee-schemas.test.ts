@@ -57,7 +57,8 @@ describe("createEmployeeSchema", () => {
   });
 
   it("rejects a missing field", () => {
-    const { email: _email, ...withoutEmail } = validCreate;
+    const withoutEmail: Partial<typeof validCreate> = { ...validCreate };
+    delete withoutEmail.email;
 
     expect(createEmployeeSchema.safeParse(withoutEmail).success).toBe(false);
   });

@@ -1,0 +1,51 @@
+// Connection URLs live in prisma.config.ts (CLI) and src/lib/db.ts (runtime).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Employee {
+  id            String    @id @default(uuid()) @db.Uuid
+  fullName      String
+  email         String    @unique
+  country       String
+  department    String
+  jobTitle      String
+  // ISO 4217 code, e.g. "USD". Analytics never mix currencies.
+  currency      String    @db.VarChar(3)
+  // Annual salary in whole currency units. Denormalized copy of the latest
+  // SalaryRecord so sorting, filtering and analytics need no join.
+  currentSalary Int
+  isActive      Boolean   @default(true)
+  hiredAt       DateTime  @db.Date
+  deactivatedAt DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  salaryRecords SalaryRecord[]
+
+  @@index([isActive, country, department])
+  @@index([isActive, currency, country])
+  @@index([isActive, currency, jobTitle])
+}
+
+// Append-only salary history. One row per salary change.
+model SalaryRecord {
+  id          String   @id @default(uuid()) @db.Uuid
+  employeeId  String   @db.Uuid
+  amount      Int
+  currency    String   @db.VarChar(3)
+  effectiveAt DateTime @default(now())
+  reason      String?
+  createdAt   DateTime @default(now())
+
+  // Restrict: history must never disappear because an employee row was removed.
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Restrict)
+
+  @@index([employeeId, effectiveAt(sort: Desc)])
+}

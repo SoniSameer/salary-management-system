@@ -1,4 +1,9 @@
 import type { Employee, EmployeeProfilePatch, SalaryRecord } from "./employee";
+import type {
+  EmployeeFilterOptions,
+  EmployeeListQuery,
+  EmployeeListResult,
+} from "./employee-list";
 
 export interface NewEmployee {
   fullName: string;
@@ -43,6 +48,15 @@ export interface EmployeeRepository {
 
   /** Salary history, newest first. */
   listSalaryHistory(employeeId: string): Promise<SalaryRecord[]>;
+
+  /**
+   * One page of employees. Filtering, sorting and paging happen in the store,
+   * never in memory. Ties are broken by id so pages never overlap or skip rows.
+   */
+  list(query: EmployeeListQuery): Promise<EmployeeListResult>;
+
+  /** Distinct values for the filter dropdowns, from all employees. */
+  getFilterOptions(): Promise<EmployeeFilterOptions>;
 
   /**
    * Atomically updates the employee's current salary and appends a history

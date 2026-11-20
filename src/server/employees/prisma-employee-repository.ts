@@ -23,10 +23,6 @@ import { escapeLikePattern } from "./like-pattern";
 const UNIQUE_VIOLATION = "P2002";
 const RECORD_NOT_FOUND = "P2025";
 
-// Prisma waits 2s to start a transaction by default. A serverless database
-// that has been idle can take longer to wake, so allow more time before failing.
-const TRANSACTION_OPTIONS = { maxWait: 10_000, timeout: 15_000 } as const;
-
 function hasCode(error: unknown, code: string): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === code;
 }
@@ -211,7 +207,7 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
       });
 
       return { employee: toEmployee(employee), record: toSalaryRecord(record) };
-    }, TRANSACTION_OPTIONS);
+    });
   }
 
   async listSalaryHistory(employeeId: string): Promise<SalaryRecord[]> {

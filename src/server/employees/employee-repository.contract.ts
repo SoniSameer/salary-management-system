@@ -147,6 +147,104 @@ export function describeEmployeeRepositoryContract(
       });
     });
 
+    describe("applySalaryChange", () => {
+      const effectiveAt = new Date("2025-06-01T00:00:00.000Z");
+
+      it("updates the current salary and adds a history record in the employee's currency", async () => {
+        const repo = await createRepository();
+        const created = await repo.createWithInitialSalary(newEmployee());
+
+        const result = await repo.applySalaryChange({
+          employeeId: created.id,
+          expectedCurrentSalary: 70_000,
+          newAmount: 78_000,
+          effectiveAt,
+          reason: "Promotion",
+        });
+
+        expect(result?.employee).toMatchObject({ id: created.id, currentSalary: 78_000 });
+        expect(result?.record).toMatchObject({
+          employeeId: created.id,
+          amount: 78_000,
+          currency: "EUR",
+          effectiveAt,
+          reason: "Promotion",
+        });
+        expect((await repo.findById(created.id))?.currentSalary).toBe(78_000);
+      });
+
+      it("lists history newest first and keeps the older records", async () => {
+        const repo = await createRepository();
+        const created = await repo.createWithInitialSalary(newEmployee());
+        await repo.applySalaryChange({
+          employeeId: created.id,
+          expectedCurrentSalary: 70_000,
+          newAmount: 75_000,
+          effectiveAt: new Date("2025-01-01T00:00:00.000Z"),
+          reason: null,
+        });
+        await repo.applySalaryChange({
+          employeeId: created.id,
+          expectedCurrentSalary: 75_000,
+          newAmount: 82_000,
+          effectiveAt: new Date("2026-01-01T00:00:00.000Z"),
+          reason: null,
+        });
+
+        const history = await repo.listSalaryHistory(created.id);
+
+        expect(history.map((record) => record.amount)).toEqual([82_000, 75_000, 70_000]);
+      });
+
+      it("writes nothing when the salary changed since it was read", async () => {
+        const repo = await createRepository();
+        const created = await repo.createWithInitialSalary(newEmployee());
+
+        const result = await repo.applySalaryChange({
+          employeeId: created.id,
+          expectedCurrentSalary: 65_000,
+          newAmount: 90_000,
+          effectiveAt,
+          reason: null,
+        });
+
+        expect(result).toBeNull();
+        expect((await repo.findById(created.id))?.currentSalary).toBe(70_000);
+        expect(await repo.listSalaryHistory(created.id)).toHaveLength(1);
+      });
+
+      it("writes nothing for a deactivated employee", async () => {
+        const repo = await createRepository();
+        const created = await repo.createWithInitialSalary(newEmployee());
+        await repo.deactivate(created.id, new Date("2026-03-01T00:00:00.000Z"));
+
+        const result = await repo.applySalaryChange({
+          employeeId: created.id,
+          expectedCurrentSalary: 70_000,
+          newAmount: 90_000,
+          effectiveAt,
+          reason: null,
+        });
+
+        expect(result).toBeNull();
+        expect(await repo.listSalaryHistory(created.id)).toHaveLength(1);
+      });
+
+      it("returns null for an unknown employee", async () => {
+        const repo = await createRepository();
+
+        const result = await repo.applySalaryChange({
+          employeeId: UNKNOWN_ID,
+          expectedCurrentSalary: 1,
+          newAmount: 2,
+          effectiveAt,
+          reason: null,
+        });
+
+        expect(result).toBeNull();
+      });
+    });
+
     describe("deactivate", () => {
       it("marks the employee inactive and keeps their salary history", async () => {
         const repo = await createRepository();

@@ -43,4 +43,28 @@ export interface EmployeeRepository {
 
   /** Salary history, newest first. */
   listSalaryHistory(employeeId: string): Promise<SalaryRecord[]>;
+
+  /**
+   * Atomically updates the employee's current salary and appends a history
+   * record, or does neither. The write only happens if the employee is still
+   * active and still paid `expectedCurrentSalary`, which protects against two
+   * people editing at the same time.
+   *
+   * @returns the result, or null if the employee does not exist, is inactive,
+   *          or the salary changed since it was read.
+   */
+  applySalaryChange(change: SalaryChange): Promise<AppliedSalaryChange | null>;
+}
+
+export interface SalaryChange {
+  employeeId: string;
+  expectedCurrentSalary: number;
+  newAmount: number;
+  effectiveAt: Date;
+  reason: string | null;
+}
+
+export interface AppliedSalaryChange {
+  employee: Employee;
+  record: SalaryRecord;
 }

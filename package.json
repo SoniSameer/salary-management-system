@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:integration": "tsx scripts/test-integration.ts",
     "db:migrate": "prisma migrate deploy",
+    "db:seed": "tsx prisma/seed.ts",
     "postinstall": "prisma generate"
   },
   "dependencies": {

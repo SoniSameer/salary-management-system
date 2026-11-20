@@ -61,7 +61,7 @@ function emailFor(name: string): string {
 }
 
 async function seedDirectory(repo: EmployeeRepository): Promise<void> {
-  for (const person of DIRECTORY) {
+  async function addPerson(person: DirectoryPerson): Promise<void> {
     const hiredAt = new Date(`${person.hiredAt}T00:00:00.000Z`);
     const employee = await repo.createWithInitialSalary(
       newEmployee({
@@ -79,7 +79,11 @@ async function seedDirectory(repo: EmployeeRepository): Promise<void> {
       await repo.deactivate(employee.id, new Date("2025-01-01T00:00:00.000Z"));
     }
   }
+
+  // In parallel: against a remote database this is several times faster.
+  await Promise.all(DIRECTORY.map(addPerson));
 }
+
 
 async function names(repo: EmployeeRepository, overrides: Partial<EmployeeListQuery>) {
   const result = await repo.list(listQuery(overrides));
@@ -284,9 +288,14 @@ export function describeEmployeeRepositoryContract(
           newEmployee({ fullName: "Pat Under_Score", email: "pat.under@example.com" }),
         );
 
+        await repo.createWithInitialSalary(
+          newEmployee({ fullName: "Pat Back\\Slash", email: "pat.back@example.com" }),
+        );
+
         expect(await names(repo, { search: "100%" })).toEqual(["Pat 100% Real"]);
         expect(await names(repo, { search: "%" })).toEqual(["Pat 100% Real"]);
         expect(await names(repo, { search: "_" })).toEqual(["Pat Under_Score"]);
+        expect(await names(repo, { search: "\\" })).toEqual(["Pat Back\\Slash"]);
       });
 
       it("sorts by salary and by hire date in both directions", async () => {

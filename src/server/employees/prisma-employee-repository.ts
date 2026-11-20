@@ -6,12 +6,18 @@ import {
 } from "@/generated/prisma/client";
 import type { Employee, EmployeeProfilePatch, SalaryRecord } from "./employee";
 import type {
+  EmployeeFilterOptions,
+  EmployeeListQuery,
+  EmployeeListResult,
+} from "./employee-list";
+import type {
   AppliedSalaryChange,
   EmployeeRepository,
   NewEmployee,
   SalaryChange,
 } from "./employee-repository";
 import { EmailAlreadyExistsError } from "./errors";
+import { escapeLikePattern } from "./like-pattern";
 
 // Prisma error codes: https://www.prisma.io/docs/orm/reference/error-reference
 const UNIQUE_VIOLATION = "P2002";
@@ -50,6 +56,27 @@ function toSalaryRecord(row: SalaryRecordRow): SalaryRecord {
     effectiveAt: row.effectiveAt,
     reason: row.reason,
   };
+}
+
+function buildWhere(query: EmployeeListQuery): Prisma.EmployeeWhereInput {
+  const where: Prisma.EmployeeWhereInput = {};
+
+  if (query.status !== "all") where.isActive = query.status === "active";
+  if (query.country) where.country = query.country;
+  if (query.department) where.department = query.department;
+  if (query.jobTitle) where.jobTitle = query.jobTitle;
+  if (query.currency) where.currency = query.currency;
+  if (query.search) {
+    // Case-insensitive "contains" on name or email (ILIKE in PostgreSQL).
+    // The text is escaped so "%" and "_" match themselves, not any character.
+    const search = escapeLikePattern(query.search);
+    where.OR = [
+      { fullName: { contains: search, mode: "insensitive" } },
+      { email: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  return where;
 }
 
 export class PrismaEmployeeRepository implements EmployeeRepository {
@@ -112,6 +139,47 @@ export class PrismaEmployeeRepository implements EmployeeRepository {
       data: { isActive: false, deactivatedAt: at },
     });
     return this.findById(id);
+  }
+
+  async list(query: EmployeeListQuery): Promise<EmployeeListResult> {
+    const where = buildWhere(query);
+
+    // The page and the total run in one transaction so they describe the same
+    // snapshot. `id` is the tiebreaker that keeps paging stable when many rows
+    // share a sort value (for example the same salary).
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.employee.findMany({
+        where,
+        orderBy: [{ [query.sortBy]: query.sortOrder }, { id: "asc" }],
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+      }),
+      this.prisma.employee.count({ where }),
+    ]);
+
+    return {
+      items: rows.map(toEmployee),
+      total,
+      page: query.page,
+      pageSize: query.pageSize,
+      totalPages: Math.ceil(total / query.pageSize),
+    };
+  }
+
+  async getFilterOptions(): Promise<EmployeeFilterOptions> {
+    const [countries, departments, jobTitles, currencies] = await Promise.all([
+      this.prisma.employee.groupBy({ by: ["country"], orderBy: { country: "asc" } }),
+      this.prisma.employee.groupBy({ by: ["department"], orderBy: { department: "asc" } }),
+      this.prisma.employee.groupBy({ by: ["jobTitle"], orderBy: { jobTitle: "asc" } }),
+      this.prisma.employee.groupBy({ by: ["currency"], orderBy: { currency: "asc" } }),
+    ]);
+
+    return {
+      countries: countries.map((row) => row.country),
+      departments: departments.map((row) => row.department),
+      jobTitles: jobTitles.map((row) => row.jobTitle),
+      currencies: currencies.map((row) => row.currency),
+    };
   }
 
   async applySalaryChange(change: SalaryChange): Promise<AppliedSalaryChange | null> {

@@ -60,6 +60,38 @@ describe("EmployeeService", () => {
     });
   });
 
+  describe("getDetails", () => {
+    it("returns the employee with their salary history, newest first", async () => {
+      const created = await service.create(validInput);
+      await repository.applySalaryChange({
+        employeeId: created.id,
+        expectedCurrentSalary: 70_000,
+        newAmount: 75_000,
+        effectiveAt: new Date("2025-01-01T00:00:00.000Z"),
+        reason: "Annual review",
+      });
+
+      const details = await service.getDetails(created.id);
+
+      expect(details.employee).toMatchObject({ id: created.id, currentSalary: 75_000 });
+      expect(details.salaryHistory.map((record) => record.amount)).toEqual([75_000, 70_000]);
+    });
+
+    it("includes deactivated employees", async () => {
+      const created = await service.create(validInput);
+      await service.deactivate(created.id);
+
+      const details = await service.getDetails(created.id);
+
+      expect(details.employee.isActive).toBe(false);
+      expect(details.salaryHistory).toHaveLength(1);
+    });
+
+    it("throws when the employee does not exist", async () => {
+      await expect(service.getDetails(UNKNOWN_ID)).rejects.toBeInstanceOf(EmployeeNotFoundError);
+    });
+  });
+
   describe("update", () => {
     it("changes the given profile fields", async () => {
       const created = await service.create(validInput);

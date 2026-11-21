@@ -79,6 +79,21 @@ describe("EmployeeDirectory: data states", () => {
     );
   });
 
+  it("gives each row an Edit link that names the employee", async () => {
+    mockEmployeeApi({ list: () => listDto([ada, chen]) });
+
+    renderDirectory();
+
+    expect(await screen.findByRole("link", { name: "Edit Ada Lovelace" })).toHaveAttribute(
+      "href",
+      `/employees/${ada.id}/edit`,
+    );
+    expect(screen.getByRole("link", { name: "Edit Chen Wei" })).toHaveAttribute(
+      "href",
+      `/employees/${chen.id}/edit`,
+    );
+  });
+
   it("labels deactivated employees in words, not only colour", async () => {
     mockEmployeeApi({
       list: () => listDto([employeeDto({ isActive: false, deactivatedAt: "2025-01-01T00:00:00.000Z" })]),
@@ -428,7 +443,7 @@ describe("EmployeeDirectory: accessibility", () => {
     renderDirectory();
 
     expect(await screen.findByRole("table", { name: "Employees" })).toBeInTheDocument();
-    for (const name of ["Name", "Country", "Department", "Job title", "Hired", "Salary", "Status"]) {
+    for (const name of ["Name", "Country", "Department", "Job title", "Hired", "Salary", "Status", "Actions"]) {
       expect(screen.getByRole("columnheader", { name: new RegExp(`^${name}`) })).toBeInTheDocument();
     }
   });

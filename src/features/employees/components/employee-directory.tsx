@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { formatNumber } from "@/lib/format";
 import type { EmployeeListQuery } from "@/server/employees/employee-list";
 import {
@@ -19,6 +19,14 @@ import { EmptyState, ErrorState } from "./directory-states";
 import { EmployeeTable } from "./employee-table";
 import { Pagination } from "./pagination";
 
+const DIRECTORY_STATE_KEY = "salary-management:employees-query";
+
+function restoreDirectoryQuery(params: URLSearchParams): EmployeeListQuery {
+  if ([...params.keys()].length > 0 || typeof window === "undefined") return parseDirectoryQuery(params);
+  const saved = window.sessionStorage.getItem(DIRECTORY_STATE_KEY);
+  return saved ? parseDirectoryQuery(new URLSearchParams(saved)) : parseDirectoryQuery(params);
+}
+
 function summary(page: number, pageSize: number, shown: number, total: number): string {
   const first = (page - 1) * pageSize + 1;
   const noun = total === 1 ? "employee" : "employees";
@@ -30,14 +38,24 @@ export function EmployeeDirectory() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const query = useMemo(() => parseDirectoryQuery(searchParams), [searchParams]);
+  const query = useMemo(() => {
+    const restored = restoreDirectoryQuery(searchParams);
+    return restored.search && restored.status === "active" ? { ...restored, status: "all" as const } : restored;
+  }, [searchParams]);
   const filterOptions = useFilterOptions();
   const list = useEmployeeList(query);
 
   function navigate(next: EmployeeListQuery) {
     const qs = queryToSearchParams(next).toString();
+    window.sessionStorage.setItem(DIRECTORY_STATE_KEY, qs);
     router.push(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem(DIRECTORY_STATE_KEY, queryToSearchParams(query).toString());
+    }
+  }, [query]);
 
   const change = (patch: DirectoryChange) => navigate(withChange(query, patch));
   const { data } = list;

@@ -13,6 +13,8 @@ interface NativeSelectProps {
   value: string;
   options: SelectOption[];
   onChange: (value: string) => void;
+  disabled?: boolean;
+  className?: string;
   /** Text shown when no value has been selected yet. */
   placeholder?: string;
 }
@@ -22,7 +24,15 @@ interface NativeSelectProps {
  * do not allow reliable CSS cursor styling for their option rows, so the listbox
  * is rendered in the app while preserving the labelled-control contract.
  */
-export function NativeSelect({ label, value, options, onChange, disabled, className, placeholder = "Select an option" }: NativeSelectProps) {
+export function NativeSelect({
+  label,
+  value,
+  options,
+  onChange,
+  disabled,
+  className,
+  placeholder = "Select an option",
+}: NativeSelectProps) {
   const generatedId = useId();
   const id = `select-${label.toLowerCase().replace(/\s+/g, "-")}`;
   const listboxId = `${id}-options-${generatedId.replace(/:/g, "")}`;

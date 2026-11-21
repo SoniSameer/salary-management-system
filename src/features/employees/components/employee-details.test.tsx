@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { apiError, employeeDto, jsonResponse, mockEmployeeApi } from "@/test/mock-api";
+import type { EmployeeDetailsDto, SalaryRecordDto } from "../api-client";
 import { EmployeeDetails } from "./employee-details";
 
 afterEach(() => {
@@ -10,12 +11,12 @@ afterEach(() => {
 
 const ada = employeeDto({ currentSalary: 70000, hiredAt: "2024-01-15T00:00:00.000Z" });
 
-const HISTORY = [
+const HISTORY: SalaryRecordDto[] = [
   { id: "r2", employeeId: ada.id, amount: 70000, currency: "EUR", effectiveAt: "2025-06-01T00:00:00.000Z", reason: "Annual review" },
   { id: "r1", employeeId: ada.id, amount: 62000, currency: "EUR", effectiveAt: "2024-01-15T00:00:00.000Z", reason: "Starting salary" },
 ];
 
-function serve(details = { employee: ada, salaryHistory: HISTORY }) {
+function serve(details: EmployeeDetailsDto = { employee: ada, salaryHistory: HISTORY }) {
   return mockEmployeeApi({
     custom: (request) => {
       if (request.method === "GET" && request.path === `/api/employees/${ada.id}`) return jsonResponse(details);

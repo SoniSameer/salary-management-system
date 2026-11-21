@@ -107,7 +107,7 @@ export function DirectoryFilters({ query, filterOptions, onChange, onClear }: Di
           onChange={(value) => onChange({ status: value as EmployeeListQuery["status"] })}
         />
         {hasActiveFilters(query) && (
-          <Button variant="ghost" onClick={onClear} className="h-10 px-2 text-sm font-medium text-primary hover:text-primary">
+          <Button variant="ghost" onClick={onClear} className="h-10 px-2 text-sm font-medium text-primary underline-offset-4 hover:text-primary hover:underline">
             Clear filters
           </Button>
         )}

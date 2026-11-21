@@ -45,8 +45,18 @@ Existing semantic Tailwind classes (`bg-card`, `text-muted-foreground`, `border-
 - `src/app/icon.svg` reuses the same geometry for the Next.js App Router favicon.
 - No external icon or downloaded asset is used. The mark is original project artwork, so no third-party license or source attribution applies.
 
+## Detail and edit refinements
 
-- Existing visible labels, roles, names, IDs, `aria-sort`, `aria-busy`, live regions, alert states and chart descriptions were preserved.
+- Employee details now use the shared 1200px shell, breadcrumb navigation, avatar treatment, profile/salary cards, and green/red salary-delta badges while preserving the existing `Back to employees` accessible name and all data behavior.
+- Edit pages use the same shell and place the existing form in a surface card. Deactivation is presented in a visually distinct danger-zone card while keeping the existing alert dialog and deactivate action.
+- The app has no existing toast infrastructure. Because this request is visual-only and forbids behavior/state changes, no new toast state or notification dependency was added. Existing inline success/error/status messaging remains unchanged.
+
+## Final responsive verification
+
+- Desktop screenshots were captured at the production build for `/employees` and `/insights?currency=EUR`.
+- The layouts use the shared responsive container, flexible toolbar controls, responsive KPI grid, and table overflow behavior for narrow screens.
+- The shared table and control primitives retain keyboard focus rings, semantic headings, labels, status text, live regions, and chart table alternatives.
+
 - Focus rings use the shared ring token and remain visible against the new surfaces.
 - Status remains written as “Active”/“Inactive” and is not conveyed by color alone.
 - The chart retains both a generated text description and a table representation.

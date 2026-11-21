@@ -26,19 +26,24 @@ export function NativeSelect({ label, value, options, onChange, disabled, classN
       <label htmlFor={id} className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
         {label}
       </label>
-      <select
+      <div className="relative">
+        <select
         id={id}
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/30 h-10 w-full rounded-lg border px-3 text-sm shadow-sm outline-none transition-[border-color,box-shadow] duration-150 focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-50"
+        className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/30 h-10 w-full appearance-none rounded-lg border px-3 pr-10 text-sm shadow-sm outline-none transition-[border-color,box-shadow] duration-150 focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>
         ))}
-      </select>
+        </select>
+        <svg aria-hidden="true" viewBox="0 0 20 20" className="text-muted-foreground pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2" fill="none" stroke="currentColor" strokeWidth="1.7">
+          <path d="m5 7 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </div>
     </div>
   );
 }

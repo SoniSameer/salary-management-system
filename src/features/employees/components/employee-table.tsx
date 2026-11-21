@@ -41,7 +41,7 @@ export function EmployeeTable({ employees, query, busy, onSort }: EmployeeTableP
                 key={column.label}
                 scope="col"
                 aria-sort={ariaSort(query, column.sortField)}
-                className={`h-11 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase ${column.align === "right" ? "text-right" : ""}`}
+                className={`h-11 px-3 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase ${column.align === "right" ? "text-right" : ""} ${column.label === "Name" ? "pl-4 sm:pl-5" : ""}`}
               >
                 {column.sortField ? (
                   <SortButton column={column} query={query} onSort={onSort} />
@@ -97,13 +97,13 @@ function SortButton({
 function EmployeeRow({ employee }: { employee: EmployeeDto }) {
   return (
     <TableRow className="group min-h-16 hover:bg-accent/45">
-      <TableCell className="px-3 py-3">
+      <TableCell className="px-4 py-3 sm:px-5">
         <div className="flex items-center gap-3">
-          <span aria-hidden="true" className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+          <span aria-hidden="true" className="bg-primary/10 text-primary flex size-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold shadow-sm">
             {initials(employee.fullName)}
           </span>
           <div className="min-w-0">
-            <Link href={`/employees/${employee.id}`} className="font-medium hover:text-primary hover:underline">
+            <Link href={`/employees/${employee.id}`} className="text-primary hover:text-primary focus-visible:ring-ring rounded-md font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none" title="View profile and salary history">
               {employee.fullName}
             </Link>
             <div className="text-muted-foreground truncate text-xs">{employee.email}</div>
@@ -129,9 +129,10 @@ function EmployeeRow({ employee }: { employee: EmployeeDto }) {
         <Link
           href={`/employees/${employee.id}/edit`}
           aria-label={`Edit ${employee.fullName}`}
-          className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring inline-flex h-8 items-center rounded-md px-2 text-sm font-medium opacity-70 transition-all duration-150 focus-visible:ring-2 focus-visible:outline-none group-hover:opacity-100"
+          className="text-muted-foreground border-border hover:bg-muted hover:text-foreground focus-visible:ring-ring inline-flex h-8 items-center gap-1 rounded-md border px-2 text-sm font-medium opacity-70 transition-all duration-150 focus-visible:ring-2 focus-visible:outline-none group-hover:opacity-100" title="Edit details or deactivate"
         >
-          Edit
+          <span aria-hidden="true" className="size-3.5">✎</span>
+          <span className="hidden sm:inline">Edit</span>
         </Link>
       </TableCell>
     </TableRow>

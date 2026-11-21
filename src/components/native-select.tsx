@@ -32,7 +32,7 @@ export function NativeSelect({ label, value, options, onChange, disabled, classN
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/30 h-10 w-full appearance-none rounded-lg border px-3 pr-10 text-sm shadow-sm outline-none transition-[border-color,box-shadow] duration-150 focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-50"
+        className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/30 h-10 w-full appearance-none rounded-lg border px-3 pr-10 text-sm shadow-sm outline-none transition-[border-color,box-shadow] duration-150 focus-visible:ring-3 disabled:cursor-not-allowed cursor-pointer disabled:opacity-50"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

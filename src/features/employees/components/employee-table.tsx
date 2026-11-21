@@ -33,7 +33,7 @@ function initials(name: string): string {
 export function EmployeeTable({ employees, query, busy, onSort }: EmployeeTableProps) {
   return (
     <div className="surface-card overflow-hidden">
-      <Table aria-label="Employees" aria-busy={busy} className="min-w-[900px]">
+      <Table aria-label="Employees" aria-busy={busy} className="min-w-[1040px] lg:min-w-0">
         <TableHeader>
           <TableRow className="bg-muted/45 hover:bg-muted/45">
             {COLUMNS.map((column) => (
@@ -41,7 +41,7 @@ export function EmployeeTable({ employees, query, busy, onSort }: EmployeeTableP
                 key={column.label}
                 scope="col"
                 aria-sort={ariaSort(query, column.sortField)}
-                className={`h-11 px-3 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase ${column.align === "right" ? "text-right" : ""} ${column.label === "Name" ? "pl-4 sm:pl-5" : ""}`}
+                className={`h-11 px-3 text-sm font-semibold tracking-wide text-muted-foreground uppercase ${column.align === "right" ? "text-right" : ""} ${column.label === "Name" ? "pl-4 sm:pl-5" : ""}`}
               >
                 {column.sortField ? (
                   <SortButton column={column} query={query} onSort={onSort} />
@@ -84,11 +84,11 @@ function SortButton({
     <button
       type="button"
       onClick={() => onSort(field)}
-      className="hover:text-foreground focus-visible:ring-ring/50 inline-flex items-center gap-1 rounded-md outline-none transition-colors duration-150 focus-visible:ring-2"
+      className="cursor-pointer hover:text-foreground focus-visible:ring-ring/50 inline-flex items-center gap-1 rounded-md outline-none transition-colors duration-150 focus-visible:ring-2"
     >
       {column.label}
-      <span aria-hidden="true" className={`w-3 text-xs ${active ? "text-primary" : "text-transparent"}`}>
-        {active ? (query.sortOrder === "asc" ? "▲" : "▼") : "▲"}
+      <span aria-hidden="true" className={`w-4 text-sm transition-colors duration-150 ${active ? "text-primary" : "text-muted-foreground/45 group-hover:text-primary/70"}`}>
+        {active ? (query.sortOrder === "asc" ? "↑" : "↓") : "↕"}
       </span>
     </button>
   );
@@ -103,7 +103,7 @@ function EmployeeRow({ employee }: { employee: EmployeeDto }) {
             {initials(employee.fullName)}
           </span>
           <div className="min-w-0">
-            <Link href={`/employees/${employee.id}`} className="text-primary hover:text-primary focus-visible:ring-ring rounded-md font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none" title="View profile and salary history">
+            <Link href={`/employees/${employee.id}`} className="cursor-pointer text-primary hover:text-primary focus-visible:ring-ring rounded-md font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none" title="View profile and salary history">
               {employee.fullName}
             </Link>
             <div className="text-muted-foreground truncate text-xs">{employee.email}</div>
@@ -120,7 +120,7 @@ function EmployeeRow({ employee }: { employee: EmployeeDto }) {
       </TableCell>
       <TableCell>
         <Badge className={employee.isActive ? "border-success/20 bg-success-soft text-success" : "bg-muted text-muted-foreground border-transparent"} variant={employee.isActive ? "secondary" : "outline"}>
-          <span aria-hidden="true" className={`size-1.5 rounded-full ${employee.isActive ? "bg-success" : "bg-muted-foreground"}`} />
+          <span aria-hidden="true" className={`size-1.5 rounded-full ${employee.isActive ? "bg-emerald-500" : "bg-red-500"}`} />
           {employee.isActive ? "Active" : "Inactive"}
         </Badge>
       </TableCell>
@@ -129,9 +129,9 @@ function EmployeeRow({ employee }: { employee: EmployeeDto }) {
         <Link
           href={`/employees/${employee.id}/edit`}
           aria-label={`Edit ${employee.fullName}`}
-          className="text-muted-foreground border-border hover:bg-muted hover:text-foreground focus-visible:ring-ring inline-flex h-8 items-center gap-1 rounded-md border px-2 text-sm font-medium opacity-70 transition-all duration-150 focus-visible:ring-2 focus-visible:outline-none group-hover:opacity-100" title="Edit details or deactivate"
+          className="cursor-pointer text-muted-foreground border-border hover:bg-muted hover:text-foreground focus-visible:ring-ring inline-flex h-8 items-center gap-1 rounded-md border px-2 text-sm font-medium opacity-70 transition-all duration-150 focus-visible:ring-2 focus-visible:outline-none group-hover:opacity-100" title="Edit details or deactivate"
         >
-          <span aria-hidden="true" className="size-3.5">✎</span>
+          <span aria-hidden="true" className="size-3.5">✐</span>
           <span className="hidden sm:inline">Edit</span>
         </Link>
       </TableCell>

@@ -1,5 +1,13 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiRequestError, fetchEmployees, fetchFilterOptions } from "./api-client";
+import {
+  ApiRequestError,
+  createEmployee,
+  deactivateEmployee,
+  fetchEmployeeDetails,
+  fetchEmployees,
+  fetchFilterOptions,
+  updateEmployee,
+} from "./api-client";
 
 const QUERY = {
   status: "active",
@@ -91,6 +99,117 @@ describe("fetchEmployees", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(abort));
 
     await expect(fetchEmployees(QUERY)).rejects.toBe(abort);
+  });
+});
+
+const EMPLOYEE = {
+  id: "f4856dc2-08f7-4b6c-8148-fa7069a3fdbf",
+  fullName: "Ada Lovelace",
+  email: "ada@example.com",
+  country: "Germany",
+  department: "Engineering",
+  jobTitle: "Software Engineer",
+  currency: "EUR",
+  currentSalary: 70000,
+  isActive: true,
+  hiredAt: "2024-01-15T00:00:00.000Z",
+  deactivatedAt: null,
+};
+
+const NEW_EMPLOYEE = {
+  fullName: "Ada Lovelace",
+  email: "ada@example.com",
+  country: "Germany",
+  department: "Engineering",
+  jobTitle: "Software Engineer",
+  currency: "EUR",
+  salary: 70000,
+  hiredAt: "2024-01-15",
+};
+
+describe("createEmployee", () => {
+  it("posts the employee as JSON and returns the created employee", async () => {
+    const fetchMock = respondWith(EMPLOYEE, { status: 201 });
+
+    const created = await createEmployee(NEW_EMPLOYEE);
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/api/employees");
+    expect(init).toMatchObject({ method: "POST" });
+    expect(new Headers(init.headers).get("content-type")).toBe("application/json");
+    expect(JSON.parse(init.body)).toEqual(NEW_EMPLOYEE);
+    expect(created.id).toBe(EMPLOYEE.id);
+  });
+
+  it("exposes per-field errors from the API", async () => {
+    respondWith(
+      {
+        error: {
+          code: "email_already_exists",
+          message: "An employee with this email already exists",
+          fields: { email: ["This email is already in use"] },
+        },
+      },
+      { status: 409 },
+    );
+
+    const error = (await createEmployee(NEW_EMPLOYEE).catch((e: unknown) => e)) as ApiRequestError;
+
+    expect(error).toBeInstanceOf(ApiRequestError);
+    expect(error.status).toBe(409);
+    expect(error.fields).toEqual({ email: ["This email is already in use"] });
+  });
+
+  it("has no field errors for a failure without them", async () => {
+    respondWith({ error: { code: "internal_error", message: "Something went wrong" } }, { status: 500 });
+
+    const error = (await createEmployee(NEW_EMPLOYEE).catch((e: unknown) => e)) as ApiRequestError;
+
+    expect(error.fields).toEqual({});
+  });
+});
+
+describe("updateEmployee", () => {
+  it("sends only the given fields with PATCH", async () => {
+    const fetchMock = respondWith({ ...EMPLOYEE, jobTitle: "Staff Engineer" });
+
+    const updated = await updateEmployee(EMPLOYEE.id, { jobTitle: "Staff Engineer" });
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(`/api/employees/${EMPLOYEE.id}`);
+    expect(init).toMatchObject({ method: "PATCH" });
+    expect(JSON.parse(init.body)).toEqual({ jobTitle: "Staff Engineer" });
+    expect(updated.jobTitle).toBe("Staff Engineer");
+  });
+});
+
+describe("deactivateEmployee", () => {
+  it("posts to the deactivate endpoint", async () => {
+    const fetchMock = respondWith({ ...EMPLOYEE, isActive: false });
+
+    const result = await deactivateEmployee(EMPLOYEE.id);
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(`/api/employees/${EMPLOYEE.id}/deactivate`);
+    expect(init).toMatchObject({ method: "POST" });
+    expect(result.isActive).toBe(false);
+  });
+});
+
+describe("fetchEmployeeDetails", () => {
+  it("returns the employee with salary history", async () => {
+    const fetchMock = respondWith({ employee: EMPLOYEE, salaryHistory: [] });
+
+    const details = await fetchEmployeeDetails(EMPLOYEE.id);
+
+    expect(String(fetchMock.mock.calls[0][0])).toBe(`/api/employees/${EMPLOYEE.id}`);
+    expect(details.employee.fullName).toBe("Ada Lovelace");
+  });
+
+  it("reports a missing employee as a 404 the caller can recognise", async () => {
+    respondWith({ error: { code: "not_found", message: "Employee not found" } }, { status: 404 });
+
+    await expect(fetchEmployeeDetails(EMPLOYEE.id)).rejects.toMatchObject({ status: 404 });
   });
 });
 

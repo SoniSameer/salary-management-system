@@ -16,6 +16,20 @@ export interface EmployeeDto {
   deactivatedAt: string | null;
 }
 
+export interface SalaryRecordDto {
+  id: string;
+  employeeId: string;
+  amount: number;
+  currency: string;
+  effectiveAt: string;
+  reason: string | null;
+}
+
+export interface EmployeeDetailsDto {
+  employee: EmployeeDto;
+  salaryHistory: SalaryRecordDto[];
+}
+
 export interface EmployeeListDto {
   items: EmployeeDto[];
   total: number;
@@ -24,12 +38,31 @@ export interface EmployeeListDto {
   totalPages: number;
 }
 
+/** What the create form sends. `hiredAt` is a plain date such as "2024-01-15". */
+export interface NewEmployeePayload {
+  fullName: string;
+  email: string;
+  country: string;
+  department: string;
+  jobTitle: string;
+  currency: string;
+  salary: number;
+  hiredAt: string;
+}
+
+/** The profile fields an edit may change. Salary and currency are not editable here. */
+export type EmployeePatchPayload = Partial<
+  Pick<NewEmployeePayload, "fullName" | "email" | "country" | "department" | "jobTitle" | "hiredAt">
+>;
+
 /** A failed API call, carrying a message that is safe to show to the user. */
 export class ApiRequestError extends Error {
   constructor(
     message: string,
     public readonly status: number | null,
     public readonly code: string | null = null,
+    /** Messages by form field, when the API says which field is wrong. */
+    public readonly fields: Record<string, string[]> = {},
   ) {
     super(message);
     this.name = "ApiRequestError";
@@ -38,10 +71,10 @@ export class ApiRequestError extends Error {
 
 const NETWORK_MESSAGE = "Could not reach the server. Check your connection and try again.";
 
-async function request<T>(url: string, signal?: AbortSignal): Promise<T> {
+async function request<T>(url: string, init: RequestInit = {}): Promise<T> {
   let response: Response;
   try {
-    response = await fetch(url, { signal });
+    response = await fetch(url, init);
   } catch (error) {
     // An aborted request is not a failure. Let the caller recognise and ignore it.
     if (error instanceof DOMException && error.name === "AbortError") throw error;
@@ -52,11 +85,26 @@ async function request<T>(url: string, signal?: AbortSignal): Promise<T> {
   return (await response.json()) as T;
 }
 
+function sendJson(method: "POST" | "PATCH", body?: unknown): RequestInit {
+  return {
+    method,
+    headers: { "content-type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  };
+}
+
 async function toApiError(response: Response): Promise<ApiRequestError> {
   try {
-    const body = (await response.json()) as { error?: { code?: string; message?: string } };
+    const body = (await response.json()) as {
+      error?: { code?: string; message?: string; fields?: Record<string, string[]> };
+    };
     if (body.error?.message) {
-      return new ApiRequestError(body.error.message, response.status, body.error.code ?? null);
+      return new ApiRequestError(
+        body.error.message,
+        response.status,
+        body.error.code ?? null,
+        body.error.fields ?? {},
+      );
     }
   } catch {
     // The body was not JSON. Fall through to the generic message.
@@ -69,9 +117,25 @@ export function fetchEmployees(
   signal?: AbortSignal,
 ): Promise<EmployeeListDto> {
   const qs = queryToSearchParams(query).toString();
-  return request<EmployeeListDto>(`/api/employees${qs ? `?${qs}` : ""}`, signal);
+  return request<EmployeeListDto>(`/api/employees${qs ? `?${qs}` : ""}`, { signal });
 }
 
 export function fetchFilterOptions(signal?: AbortSignal): Promise<EmployeeFilterOptions> {
-  return request<EmployeeFilterOptions>("/api/employees/filter-options", signal);
+  return request<EmployeeFilterOptions>("/api/employees/filter-options", { signal });
+}
+
+export function fetchEmployeeDetails(id: string, signal?: AbortSignal): Promise<EmployeeDetailsDto> {
+  return request<EmployeeDetailsDto>(`/api/employees/${id}`, { signal });
+}
+
+export function createEmployee(payload: NewEmployeePayload): Promise<EmployeeDto> {
+  return request<EmployeeDto>("/api/employees", sendJson("POST", payload));
+}
+
+export function updateEmployee(id: string, patch: EmployeePatchPayload): Promise<EmployeeDto> {
+  return request<EmployeeDto>(`/api/employees/${id}`, sendJson("PATCH", patch));
+}
+
+export function deactivateEmployee(id: string): Promise<EmployeeDto> {
+  return request<EmployeeDto>(`/api/employees/${id}/deactivate`, sendJson("POST"));
 }

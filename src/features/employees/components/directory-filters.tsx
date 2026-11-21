@@ -34,14 +34,27 @@ export function DirectoryFilters({ query, filterOptions, onChange, onClear }: Di
   const pathname = usePathname();
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const draftRef = useRef(query.search ?? "");
+  const lastCommittedSearchRef = useRef(query.search ?? "");
   const [draftSearch, setDraftSearch] = useState(query.search ?? "");
 
   useEffect(() => {
-    setDraftSearch(query.search ?? "");
+    const committed = query.search ?? "";
+    // Only synchronize from the URL when it was changed externally. A debounce
+    // commit caused by this component must never overwrite characters currently
+    // being typed into the input.
+    if (committed !== lastCommittedSearchRef.current && committed !== draftRef.current) {
+      draftRef.current = committed;
+      lastCommittedSearchRef.current = committed;
+      setDraftSearch(committed);
+    }
   }, [query.search]);
 
   function replaceSearch(value: string) {
-    const next = { ...query, search: value.trim() || undefined, page: 1 };
+    const trimmed = value.trim();
+    draftRef.current = trimmed;
+    lastCommittedSearchRef.current = trimmed;
+    const next = { ...query, search: trimmed || undefined, page: 1 };
     const qs = queryToSearchParams(next).toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }
@@ -61,7 +74,14 @@ export function DirectoryFilters({ query, filterOptions, onChange, onClear }: Di
     inputRef.current?.focus();
   }
 
+  function handleDraftChange(value: string) {
+    const nextValue = value.slice(0, 100);
+    draftRef.current = nextValue;
+    setDraftSearch(nextValue);
+  }
+
   function clearSearch() {
+    draftRef.current = "";
     setDraftSearch("");
     replaceSearch("");
     requestAnimationFrame(() => inputRef.current?.focus());
@@ -81,7 +101,7 @@ export function DirectoryFilters({ query, filterOptions, onChange, onClear }: Di
               type="search"
               placeholder="Name or email"
               value={draftSearch}
-              onChange={(event) => setDraftSearch(event.target.value.slice(0, 100))}
+              onChange={(event) => handleDraftChange(event.target.value)}
               maxLength={100}
               autoComplete="off"
               className="h-10 pr-10 pl-9"

@@ -11,7 +11,16 @@ import { generateEmployees } from "../src/seed/generate-employees";
 const EMPLOYEE_COUNT = 10_000;
 const SEED = 20261120;
 
-const baseUrl = process.argv[2] ?? "http://localhost:3100";
+// Usage: tsx scripts/verify-insights.ts <baseUrl> [--extra "country|jobTitle|currency|salary"]...
+// Each --extra adds one ACTIVE employee that was created after the seed, so the
+// expected figures account for people added through the app.
+const args = process.argv.slice(2);
+const baseUrl = args.find((arg) => arg.startsWith("http")) ?? "http://localhost:3100";
+const extras = args.flatMap((arg, index) => {
+  if (args[index - 1] !== "--extra") return [];
+  const [country, jobTitle, currency, salary] = arg.split("|");
+  return [{ country, jobTitle, currency, currentSalary: Number(salary) }];
+});
 
 interface Stats {
   headcount: number;
@@ -70,7 +79,9 @@ function check(label: string, actual: unknown, expected: unknown): void {
 }
 
 async function main(): Promise<void> {
-  const active = generateEmployees(EMPLOYEE_COUNT, SEED).filter((employee) => employee.isActive);
+  const seeded = generateEmployees(EMPLOYEE_COUNT, SEED).filter((employee) => employee.isActive);
+  const active = [...seeded, ...extras];
+  if (extras.length > 0) console.log(`including ${extras.length} extra employee(s) added after the seed\n`);
   const { currencies } = await get<{ currencies: { currency: string; headcount: number }[] }>("/api/insights/currencies");
 
   let comparisons = 0;

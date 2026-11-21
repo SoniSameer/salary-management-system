@@ -1,4 +1,5 @@
 import { Input } from "@/components/ui/input";
+import { NativeSelect, type SelectOption } from "@/components/native-select";
 
 interface TextFieldProps {
   name: string;
@@ -7,8 +8,8 @@ interface TextFieldProps {
   onChange: (value: string) => void;
   error?: string;
   hint?: string;
-  /** Id of a <datalist> that offers suggestions while still allowing new values. */
-  list?: string;
+  /** Use the shared custom listbox instead of a free-text datalist. */
+  selectOptions?: SelectOption[];
   type?: "text" | "email" | "date";
   inputMode?: "numeric" | "text";
   autoComplete?: string;
@@ -23,7 +24,7 @@ export function TextField({
   onChange,
   error,
   hint,
-  list,
+  selectOptions,
   type = "text",
   inputMode,
   autoComplete = "off",
@@ -35,23 +36,28 @@ export function TextField({
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={name} className="text-sm font-medium">
-        {label}
-      </label>
-      <Input
-        id={name}
-        name={name}
-        type={type}
-        value={value}
-        list={list}
-        inputMode={inputMode}
-        autoComplete={autoComplete}
-        maxLength={maxLength}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy || undefined}
-        className={type === "date" ? "cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer" : undefined}
-        onChange={(event) => onChange(event.target.value)}
-      />
+      {selectOptions ? (
+        <NativeSelect label={label} value={value} options={selectOptions} onChange={onChange} />
+      ) : (
+        <>
+          <label htmlFor={name} className="text-sm font-medium">
+            {label}
+          </label>
+          <Input
+            id={name}
+            name={name}
+            type={type}
+            value={value}
+            inputMode={inputMode}
+            autoComplete={autoComplete}
+            maxLength={maxLength}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={describedBy || undefined}
+            className={type === "date" ? "cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer" : undefined}
+            onChange={(event) => onChange(event.target.value)}
+          />
+        </>
+      )}
       {hint && (
         <p id={hintId} className="text-muted-foreground text-xs">
           {hint}

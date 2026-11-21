@@ -116,9 +116,9 @@ export function EmployeeForm(props: EmployeeFormProps) {
       <div className="grid gap-4 sm:grid-cols-2">
         <TextField name="fullName" label="Full name" value={values.fullName} error={errors.fullName} onChange={(v) => change("fullName", v)} autoComplete="name" maxLength={120} />
         <TextField name="email" label="Email" type="email" value={values.email} error={errors.email} onChange={(v) => change("email", v)} autoComplete="email" maxLength={254} />
-        <TextField name="country" label="Country" list="country-options" value={values.country} error={errors.country} onChange={(v) => change("country", v)} maxLength={80} />
-        <TextField name="department" label="Department" list="department-options" value={values.department} error={errors.department} onChange={(v) => change("department", v)} maxLength={80} />
-        <TextField name="jobTitle" label="Job title" list="job-title-options" value={values.jobTitle} error={errors.jobTitle} onChange={(v) => change("jobTitle", v)} maxLength={120} />
+          <TextField name="country" label="Country" selectOptions={options?.countries.map((value) => ({ value, label: value }))} value={values.country} error={errors.country} onChange={(v) => change("country", v)} maxLength={80} />
+          <TextField name="department" label="Department" selectOptions={options?.departments.map((value) => ({ value, label: value }))} value={values.department} error={errors.department} onChange={(v) => change("department", v)} maxLength={80} />
+          <TextField name="jobTitle" label="Job title" selectOptions={options?.jobTitles.map((value) => ({ value, label: value }))} value={values.jobTitle} error={errors.jobTitle} onChange={(v) => change("jobTitle", v)} maxLength={120} />
         <TextField name="hiredAt" label="Hire date" type="date" value={values.hiredAt} error={errors.hiredAt} onChange={(v) => change("hiredAt", v)} />
 
         {employee ? (
@@ -134,7 +134,7 @@ export function EmployeeForm(props: EmployeeFormProps) {
           </dl>
         ) : (
           <>
-            <TextField name="currency" label="Currency" list="currency-options" value={values.currency} error={errors.currency} onChange={(v) => change("currency", v)} hint="3-letter code, for example EUR. It cannot be changed later." maxLength={3} />
+            <TextField name="currency" label="Currency" selectOptions={options?.currencies.map((value) => ({ value, label: value }))} value={values.currency} error={errors.currency} onChange={(v) => change("currency", v)} hint="3-letter code, for example EUR. It cannot be changed later." maxLength={3} />
             <TextField name="salary" label="Starting salary (per year)" inputMode="numeric" value={values.salary} error={errors.salary} onChange={(v) => change("salary", v)} hint="In the currency above, as a whole number." />
           </>
         )}

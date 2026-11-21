@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { z } from "zod";
 import {
   createEmployeeSchema,
   employeeIdSchema,
@@ -84,6 +85,34 @@ describe("updateEmployeeSchema", () => {
   it("applies the same field rules as create", () => {
     expect(updateEmployeeSchema.safeParse({ email: "nope" }).success).toBe(false);
     expect(updateEmployeeSchema.safeParse({ fullName: "" }).success).toBe(false);
+  });
+});
+
+describe("createEmployeeSchema error messages", () => {
+  // The same messages reach the API response and the form, so they are written
+  // for the HR manager, not for developers.
+  function messageFor(field: string, override: Record<string, unknown>): string | undefined {
+    const result = createEmployeeSchema.safeParse({ ...validCreate, ...override });
+    if (result.success) throw new Error("expected validation to fail");
+    const fieldErrors: Record<string, string[] | undefined> = z.flattenError(result.error).fieldErrors;
+    return fieldErrors[field]?.[0];
+  }
+
+  it.each([
+    ["fullName", { fullName: "   " }, "This field is required"],
+    ["fullName", { fullName: "x".repeat(121) }, "Use 120 characters or fewer"],
+    ["email", { email: "not-an-email" }, "Enter a valid email address"],
+    ["email", { email: "" }, "Enter a valid email address"],
+    ["currency", { currency: "US" }, "Use a 3-letter ISO currency code, for example USD"],
+    ["salary", { salary: 0 }, "Enter a salary above zero"],
+    ["salary", { salary: -5 }, "Enter a salary above zero"],
+    ["salary", { salary: 10.5 }, "Use a whole number"],
+    ["salary", { salary: Number.NaN }, "Enter a salary"],
+    ["salary", { salary: 2_000_000_000 }, "That amount is too large"],
+    ["hiredAt", { hiredAt: "2023-02-30" }, "Enter a valid date"],
+    ["hiredAt", { hiredAt: "" }, "Enter a valid date"],
+  ])("explains a bad %s in plain words", (field, override, expected) => {
+    expect(messageFor(field, override)).toBe(expected);
   });
 });
 

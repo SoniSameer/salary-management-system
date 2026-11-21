@@ -39,7 +39,12 @@ Existing semantic Tailwind classes (`bg-card`, `text-muted-foreground`, `border-
 - Kept the chart's `role="img"` accessible description and expandable data table unchanged in behavior.
 - Wrapped country and job-title breakdowns in card surfaces with currency labels and average-column heat tinting.
 
-## Accessibility choices
+## Branding
+
+- `src/components/Logo.tsx` is an original inline SVG mark created for this project. It uses a geometric rounded square with ascending payroll bars and a small coin detail; it contains no text and is legible at 24px/32px.
+- `src/app/icon.svg` reuses the same geometry for the Next.js App Router favicon.
+- No external icon or downloaded asset is used. The mark is original project artwork, so no third-party license or source attribution applies.
+
 
 - Existing visible labels, roles, names, IDs, `aria-sort`, `aria-busy`, live regions, alert states and chart descriptions were preserved.
 - Focus rings use the shared ring token and remain visible against the new surfaces.

@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
 import { DemoBanner } from "@/components/demo-banner";
+import { Logo } from "@/components/Logo";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -20,6 +21,10 @@ export const metadata: Metadata = {
     "Manage employee salaries and see how the organization pays its people.",
 };
 
+export const viewport: Viewport = {
+  themeColor: "#4747d6",
+};
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
@@ -36,10 +41,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <DemoBanner />
         <header className="bg-background/90 sticky top-0 z-40 border-b backdrop-blur-xl">
           <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-            <Link href="/employees" className="group flex items-center gap-2.5 font-semibold tracking-tight">
-              <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-lg text-xs font-bold shadow-sm transition-transform duration-150 group-hover:scale-105">
-                SM
-              </span>
+            <Link href="/employees" className="group flex items-center gap-2 font-semibold tracking-tight">
+              <Logo size={32} className="text-primary transition-transform duration-150 group-hover:scale-105" />
               <span>Salary Management</span>
             </Link>
             <nav aria-label="Main" className="flex items-center gap-1 rounded-lg border bg-card/70 p-1 shadow-sm">

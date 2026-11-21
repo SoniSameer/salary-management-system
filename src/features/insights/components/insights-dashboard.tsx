@@ -29,22 +29,24 @@ function currencyOptions(currencies: CurrencyHeadcount[], current: string | null
 
 function LoadingNotice({ children }: { children: string }) {
   return (
-    <p role="status" className="text-muted-foreground text-sm">
+    <div role="status" className="surface-card flex items-center gap-3 p-6 text-sm text-muted-foreground">
+      <span aria-hidden="true" className="border-primary/25 border-t-primary size-4 animate-spin rounded-full border-2" />
       {children}
-    </p>
+    </div>
   );
 }
 
 function ErrorNotice({ title, message, onRetry }: { title: string; message: string; onRetry: () => void }) {
   return (
-    <div role="alert" className="border-destructive/30 bg-destructive/5 flex flex-col items-start gap-3 rounded-lg border p-6">
-      <div>
-        <p className="font-medium">{title}</p>
-        <p className="text-muted-foreground text-sm">{message}</p>
+    <div role="alert" className="surface-card flex flex-col items-start gap-4 border-destructive/25 bg-destructive/5 p-6">
+      <div className="flex items-start gap-3">
+        <span aria-hidden="true" className="bg-destructive/10 text-destructive flex size-9 shrink-0 items-center justify-center rounded-full text-lg">!</span>
+        <div>
+          <p className="font-semibold">{title}</p>
+          <p className="text-muted-foreground mt-1 text-sm">{message}</p>
+        </div>
       </div>
-      <Button variant="outline" onClick={onRetry}>
-        Try again
-      </Button>
+      <Button variant="outline" onClick={onRetry}>Try again</Button>
     </div>
   );
 }
@@ -68,36 +70,42 @@ export function InsightsDashboard() {
   if (currencies.isLoading || !currencies.data) return <LoadingNotice>Loading insights…</LoadingNotice>;
   if (currencies.data.length === 0 && !currency) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed p-10 text-center">
-        <p className="font-medium">No employees yet</p>
+      <div className="surface-card flex flex-col items-center gap-3 border-dashed p-14 text-center">
+        <span aria-hidden="true" className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full text-xl">✦</span>
+        <p className="font-semibold">No employees yet</p>
         <p className="text-muted-foreground text-sm">Insights appear once employees have been added.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-6">
+      <div className="surface-card flex flex-col gap-4 p-4 sm:flex-row sm:items-end sm:justify-between sm:p-5">
+        <div className="space-y-1">
+          <p className="text-sm font-semibold">Choose a currency</p>
+          <p className="text-muted-foreground text-xs">Review compensation without converting currencies.</p>
+        </div>
         <NativeSelect
           label="Currency"
           value={currency ?? ""}
           options={currencyOptions(currencies.data, currency)}
           onChange={(next) => router.push(`${pathname}?currency=${next}`, { scroll: false })}
-          className="w-fit"
+          className="w-full sm:max-w-xs"
         />
-        {currency && (
-          <p role="note" className="text-muted-foreground bg-muted rounded-lg p-3 text-sm">
-            {`These figures are for active employees paid in ${currency}. Amounts in different currencies are never combined or converted.`}
-          </p>
-        )}
       </div>
+      {currency && (
+        <p role="note" className="border-primary/20 bg-primary/5 text-primary flex items-start gap-2 rounded-lg border p-3 text-sm">
+          <span aria-hidden="true" className="mt-0.5 font-semibold">ⓘ</span>
+          <span>{`These figures are for active employees paid in ${currency}. Amounts in different currencies are never combined or converted.`}</span>
+        </p>
+      )}
 
       {insights.error ? (
         <ErrorNotice title="Could not load the insights" message={insights.error.message} onRetry={insights.retry} />
       ) : insights.isLoading || !insights.data ? (
         <LoadingNotice>Loading insights…</LoadingNotice>
       ) : insights.data.overall === null ? (
-        <p className="rounded-lg border border-dashed p-10 text-center">{`No active employees are paid in ${insights.data.currency}.`}</p>
+        <p className="surface-card border-dashed p-14 text-center">{`No active employees are paid in ${insights.data.currency}.`}</p>
       ) : (
         <>
           <Summary stats={insights.data.overall} currency={insights.data.currency} />

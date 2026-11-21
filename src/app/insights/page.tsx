@@ -8,10 +8,13 @@ export const metadata: Metadata = { title: "Insights" };
 // The heading is prerendered, and the dashboard takes over in the browser.
 export default function InsightsPage() {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Salary insights</h1>
-        <p className="text-muted-foreground text-sm">How the organization pays its people, one currency at a time.</p>
+    <div className="flex flex-col gap-7">
+      <div className="space-y-1.5">
+        <p className="text-primary text-xs font-semibold tracking-[0.16em] uppercase">Compensation analytics</p>
+        <h1 className="text-3xl font-semibold tracking-tight sm:text-[32px]">Salary insights</h1>
+        <p className="text-muted-foreground text-sm sm:text-[15px]">
+          How the organization pays its people, one currency at a time.
+        </p>
       </div>
       <Suspense
         fallback={

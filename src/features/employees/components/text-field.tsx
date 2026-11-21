@@ -49,7 +49,7 @@ export function TextField({
         maxLength={maxLength}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy || undefined}
-        className={type === "date" ? "[&::-webkit-calendar-picker-indicator]:cursor-pointer" : undefined}
+        className={type === "date" ? "cursor-pointer [&::-webkit-calendar-picker-indicator]:cursor-pointer" : undefined}
         onChange={(event) => onChange(event.target.value)}
       />
       {hint && (

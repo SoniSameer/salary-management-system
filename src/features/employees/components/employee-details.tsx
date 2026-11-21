@@ -68,7 +68,7 @@ export function EmployeeDetails({ employeeId }: { employeeId: string }) {
           <span aria-hidden="true" className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full text-sm font-semibold shadow-sm">
             {employee.fullName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join("")}
           </span>
-          <div><h1 className="text-2xl font-semibold tracking-tight">{employee.fullName}</h1><Badge className={employee.isActive ? "border-success/20 bg-success-soft text-success" : "bg-muted text-muted-foreground border-transparent"} variant={employee.isActive ? "secondary" : "outline"}><span aria-hidden="true" className={`size-1.5 rounded-full ${employee.isActive ? "bg-success" : "bg-muted-foreground"}`} />{employee.isActive ? "Active" : "Inactive"}</Badge></div>
+          <div><h1 className="text-2xl font-semibold tracking-tight">{employee.fullName}</h1><Badge className={employee.isActive ? "border-success/20 bg-success-soft text-success" : "bg-muted text-muted-foreground border-transparent"} variant={employee.isActive ? "secondary" : "outline"}><span aria-hidden="true" className={`size-1.5 rounded-full ${employee.isActive ? "bg-emerald-500" : "bg-red-500"}`} />{employee.isActive ? "Active" : "Inactive"}</Badge></div>
         </div>
         <div className="flex items-center gap-2">
           <Link href={`/employees/${employee.id}/edit`} className={buttonVariants({ variant: "outline" })}>Edit profile</Link>

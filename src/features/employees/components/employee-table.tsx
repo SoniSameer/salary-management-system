@@ -131,7 +131,7 @@ function EmployeeRow({ employee }: { employee: EmployeeDto }) {
           aria-label={`Edit ${employee.fullName}`}
           className="cursor-pointer text-muted-foreground border-border hover:bg-muted hover:text-foreground focus-visible:ring-ring inline-flex h-8 items-center gap-1 rounded-md border px-2 text-sm font-medium opacity-70 transition-all duration-150 focus-visible:ring-2 focus-visible:outline-none group-hover:opacity-100" title="Edit details or deactivate"
         >
-          <span aria-hidden="true" className="size-3.5">✐</span>
+          <svg aria-hidden="true" viewBox="0 0 16 16" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="m3.25 12.75 1.05-3.35L10.9 2.8a1.35 1.35 0 0 1 1.9 1.9l-6.6 6.6-3.35 1.05Z" /><path d="m9.8 3.9 2.3 2.3" /><path d="m3.25 12.75 1.05-3.35 2.3 2.3-3.35 1.05Z" fill="currentColor" stroke="none" /></svg>
           <span className="hidden sm:inline">Edit</span>
         </Link>
       </TableCell>

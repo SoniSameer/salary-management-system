@@ -1,3 +1,4 @@
+import { unstable_rethrow } from "next/navigation";
 import { z } from "zod";
 import {
   ConcurrentSalaryChangeError,
@@ -38,6 +39,11 @@ function errorResponse(status: number, body: ErrorBody["error"]): Response {
  * call this in their catch block, so the status mapping lives in one place.
  */
 export function toErrorResponse(error: unknown): Response {
+  // Next.js uses thrown errors for control flow (notFound(), redirects, and the
+  // signal that a route reads request data while it is built). These are not
+  // failures, so they must reach the framework instead of becoming a 500.
+  unstable_rethrow(error);
+
   if (error instanceof z.ZodError) {
     const { fieldErrors, formErrors } = z.flattenError(error);
     return errorResponse(400, {

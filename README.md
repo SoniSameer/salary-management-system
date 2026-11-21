@@ -4,9 +4,12 @@ A web app for an HR Manager to manage salaries for an organization of 10,000 emp
 
 > **Demo only.** It uses synthetic data and has no login, so anyone with the link can view and change it. Do not enter real employee information.
 
-- **Live demo:** _add the Vercel URL here after deploying_
-- **Demo video:** _add the link here_
+- **Live demo:** https://salary-management-system-beta.vercel.app/employees
+- **Demo video:** _record separately before submitting_
 - **Requirements and scope:** [docs/requirements.md](docs/requirements.md)
+- **Design and architecture:** [docs/design.md](docs/design.md)
+- **Trade-offs and deliberate omissions:** [docs/tradeoffs.md](docs/tradeoffs.md)
+- **Performance considerations:** [docs/performance.md](docs/performance.md)
 - **How AI was used, and what I corrected:** [docs/ai-workflow.md](docs/ai-workflow.md)
 
 | Employee directory | Employee details and salary history |

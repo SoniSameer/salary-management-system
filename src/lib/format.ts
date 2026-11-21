@@ -24,6 +24,22 @@ export function formatMoney(amount: number, currency: string): string {
   }
 }
 
+/** Short money for chart axes and labels, for example "€40K" or "¥8M". */
+export function formatCompactMoney(amount: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat(LOCALE, {
+      style: "currency",
+      currency,
+      notation: "compact",
+      // Without the minimum, currency + compact shows "€40.0K" instead of "€40K".
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    }).format(amount);
+  } catch {
+    return `${currency} ${new Intl.NumberFormat(LOCALE, { notation: "compact", maximumFractionDigits: 1 }).format(amount)}`;
+  }
+}
+
 const dateFormat = new Intl.DateTimeFormat(LOCALE, {
   year: "numeric",
   month: "short",

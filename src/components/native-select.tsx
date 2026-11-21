@@ -22,8 +22,8 @@ export function NativeSelect({ label, value, options, onChange, disabled, classN
   const id = `select-${label.toLowerCase().replace(/\s+/g, "-")}`;
 
   return (
-    <div className={cn("flex flex-col gap-1", className)}>
-      <label htmlFor={id} className="text-muted-foreground text-xs font-medium">
+    <div className={cn("flex min-w-[148px] flex-1 flex-col gap-1.5", className)}>
+      <label htmlFor={id} className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
         {label}
       </label>
       <select
@@ -31,7 +31,7 @@ export function NativeSelect({ label, value, options, onChange, disabled, classN
         value={value}
         disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="border-input bg-background focus-visible:border-ring focus-visible:ring-ring/50 h-8 rounded-lg border px-2 text-sm outline-none focus-visible:ring-3 disabled:opacity-50"
+        className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/30 h-10 w-full rounded-lg border px-3 text-sm shadow-sm outline-none transition-[border-color,box-shadow] duration-150 focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {options.map((option) => (
           <option key={option.value} value={option.value}>

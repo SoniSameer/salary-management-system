@@ -29,27 +29,36 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <a
           href="#main-content"
-          className="bg-background focus:ring-ring sr-only z-50 rounded px-3 py-2 focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:ring-2"
+          className="bg-background focus:ring-ring sr-only z-50 rounded-md px-3 py-2 text-sm font-medium shadow-lg focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:ring-2"
         >
           Skip to main content
         </a>
         <DemoBanner />
-        <header className="border-b">
-          <div className="mx-auto flex max-w-7xl items-center gap-8 px-6 py-3">
-            <Link href="/employees" className="font-semibold tracking-tight">
-              Salary Management
+        <header className="bg-background/90 sticky top-0 z-40 border-b backdrop-blur-xl">
+          <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
+            <Link href="/employees" className="group flex items-center gap-2.5 font-semibold tracking-tight">
+              <span className="bg-primary text-primary-foreground flex size-8 items-center justify-center rounded-lg text-xs font-bold shadow-sm transition-transform duration-150 group-hover:scale-105">
+                SM
+              </span>
+              <span>Salary Management</span>
             </Link>
-            <nav aria-label="Main" className="flex gap-4 text-sm">
-              <Link href="/employees" className="hover:underline">
+            <nav aria-label="Main" className="flex items-center gap-1 rounded-lg border bg-card/70 p-1 shadow-sm">
+              <Link
+                href="/employees"
+                className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none"
+              >
                 Employees
               </Link>
-              <Link href="/insights" className="hover:underline">
+              <Link
+                href="/insights"
+                className="text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-ring rounded-md px-3 py-1.5 text-sm font-medium transition-colors duration-150 focus-visible:ring-2 focus-visible:outline-none"
+              >
                 Insights
               </Link>
             </nav>
           </div>
         </header>
-        <main id="main-content" className="mx-auto w-full max-w-7xl flex-1 px-6 py-8">
+        <main id="main-content" className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-10">
           {children}
         </main>
       </body>

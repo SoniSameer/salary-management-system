@@ -11,10 +11,16 @@ export const metadata: Metadata = { title: "Employees" };
 // placeholder are prerendered, and the directory takes over in the browser.
 export default function EmployeesPage() {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="text-2xl font-semibold tracking-tight">Employees</h1>
-        <Link href="/employees/new" className={buttonVariants()}>
+    <div className="flex flex-col gap-7">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1.5">
+          <p className="text-primary text-xs font-semibold tracking-[0.16em] uppercase">People operations</p>
+          <h1 className="text-3xl font-semibold tracking-tight sm:text-[32px]">Employees</h1>
+          <p className="text-muted-foreground text-sm sm:text-[15px]">
+            Manage employee profiles, compensation and salary history in one place.
+          </p>
+        </div>
+        <Link href="/employees/new" className={buttonVariants({ size: "lg" })}>
           Add employee
         </Link>
       </div>

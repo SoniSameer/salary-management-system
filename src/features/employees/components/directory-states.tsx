@@ -11,10 +11,10 @@ export function LoadingRows() {
   return (
     <TableBody aria-hidden="true">
       {Array.from({ length: SKELETON_ROWS }, (_, row) => (
-        <TableRow key={row}>
+        <TableRow key={row} className="min-h-16">
           {Array.from({ length: SKELETON_COLUMNS }, (_, column) => (
-            <TableCell key={column}>
-              <Skeleton className="h-4 w-full" />
+            <TableCell key={column} className="px-3 py-4">
+              <Skeleton className={`h-4 ${column === 0 ? "w-44" : "w-full"}`} />
             </TableCell>
           ))}
         </TableRow>
@@ -25,10 +25,13 @@ export function LoadingRows() {
 
 export function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div role="alert" className="border-destructive/30 bg-destructive/5 flex flex-col items-start gap-3 rounded-lg border p-6">
-      <div>
-        <p className="font-medium">Could not load employees</p>
-        <p className="text-muted-foreground text-sm">{message}</p>
+    <div role="alert" className="surface-card flex flex-col items-start gap-4 border-destructive/25 bg-destructive/5 p-6">
+      <div className="flex items-start gap-3">
+        <span aria-hidden="true" className="bg-destructive/10 text-destructive flex size-9 shrink-0 items-center justify-center rounded-full text-lg">!</span>
+        <div>
+          <p className="font-semibold">Could not load employees</p>
+          <p className="text-muted-foreground mt-1 text-sm">{message}</p>
+        </div>
       </div>
       <Button variant="outline" onClick={onRetry}>
         Try again
@@ -46,16 +49,17 @@ interface EmptyStateProps {
 
 export function EmptyState({ reason, onClearFilters, onFirstPage }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed p-10 text-center">
+    <div className="surface-card flex flex-col items-center gap-3 border-dashed p-14 text-center">
+      <span aria-hidden="true" className="bg-primary/10 text-primary flex size-12 items-center justify-center rounded-full text-xl">⌕</span>
       {reason === "no-employees" && (
         <>
-          <p className="font-medium">No employees yet</p>
+          <p className="font-semibold">No employees yet</p>
           <p className="text-muted-foreground text-sm">Employees you add will appear here.</p>
         </>
       )}
       {reason === "filtered" && (
         <>
-          <p className="font-medium">No employees match your filters</p>
+          <p className="font-semibold">No employees match your filters</p>
           <p className="text-muted-foreground text-sm">Try a different search or remove a filter.</p>
           <Button variant="outline" onClick={onClearFilters}>
             Show all employees
@@ -64,7 +68,7 @@ export function EmptyState({ reason, onClearFilters, onFirstPage }: EmptyStatePr
       )}
       {reason === "past-last-page" && (
         <>
-          <p className="font-medium">This page is past the end of the list</p>
+          <p className="font-semibold">This page is past the end of the list</p>
           <Button variant="outline" onClick={onFirstPage}>
             Go to the first page
           </Button>

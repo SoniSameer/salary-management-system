@@ -8,15 +8,15 @@ import { LoadingRows } from "./directory-states";
  */
 export function DirectoryFallback() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="surface-card overflow-hidden">
       <p role="status" className="sr-only">
         Loading employees…
       </p>
-      <Table aria-label="Employees" aria-busy="true">
+      <Table aria-label="Employees" aria-busy="true" className="min-w-[900px]">
         <TableHeader>
-          <TableRow>
+          <TableRow className="bg-muted/45 hover:bg-muted/45">
             {COLUMNS.map((column) => (
-              <TableHead key={column.label} scope="col" className={column.align === "right" ? "text-right" : undefined}>
+              <TableHead key={column.label} scope="col" className={`h-11 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase ${column.align === "right" ? "text-right" : ""}`}>
                 {column.visuallyHidden ? <span className="sr-only">{column.label}</span> : column.label}
               </TableHead>
             ))}

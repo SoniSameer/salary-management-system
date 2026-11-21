@@ -43,7 +43,7 @@ export function EmployeeDirectory() {
   const { data } = list;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       <DirectoryFilters
         query={query}
         filterOptions={filterOptions}
@@ -52,7 +52,7 @@ export function EmployeeDirectory() {
       />
 
       {query.sortBy === "currentSalary" && !query.currency && (
-        <p role="note" className="text-muted-foreground bg-muted rounded-lg p-3 text-sm">
+        <p role="note" className="border-primary/20 bg-primary/5 text-primary rounded-lg border p-3 text-sm">
           Salaries in different currencies cannot be compared. Choose a currency to rank salaries fairly.
         </p>
       )}
@@ -74,7 +74,7 @@ export function EmployeeDirectory() {
         />
       ) : (
         <>
-          <p aria-live="polite" className="text-muted-foreground text-sm">
+          <p aria-live="polite" className="text-muted-foreground text-sm tabular-nums">
             {summary(data.page, data.pageSize, data.items.length, data.total)}
           </p>
           <EmployeeTable

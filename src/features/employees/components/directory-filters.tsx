@@ -36,33 +36,42 @@ export function DirectoryFilters({ query, filterOptions, onChange, onClear }: Di
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="surface-card flex flex-col gap-5 p-4 sm:p-5">
       <form
         role="search"
         aria-label="Search employees"
         onSubmit={submitSearch}
-        className="flex items-end gap-2"
+        className="flex flex-col gap-1.5 sm:flex-row sm:items-end"
       >
-        <div className="flex max-w-sm flex-1 flex-col gap-1">
-          <label htmlFor="employee-search" className="text-muted-foreground text-xs font-medium">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <label htmlFor="employee-search" className="text-muted-foreground text-[11px] font-semibold tracking-wide uppercase">
             Search
           </label>
-          {/* Keyed by the URL value so Clear filters and back/forward reset the text. */}
-          <Input
-            key={query.search ?? ""}
-            id="employee-search"
-            name="search"
-            type="search"
-            placeholder="Name or email"
-            defaultValue={query.search ?? ""}
-            maxLength={100}
-            autoComplete="off"
-          />
+          <div className="relative">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="m16 16 4 4" strokeLinecap="round" />
+            </svg>
+            {/* Keyed by the URL value so Clear filters and back/forward reset the search text. */}
+            <Input
+              key={query.search ?? ""}
+              id="employee-search"
+              name="search"
+              type="search"
+              placeholder="Name or email"
+              defaultValue={query.search ?? ""}
+              maxLength={100}
+              autoComplete="off"
+              className="h-10 pl-9"
+            />
+          </div>
         </div>
-        <Button type="submit">Search</Button>
+        <Button type="submit" size="lg" className="sm:h-10">
+          Search
+        </Button>
       </form>
 
-      <div className="flex flex-wrap items-end gap-3">
+      <div className="flex flex-wrap items-end gap-3 border-t pt-4">
         <NativeSelect
           label="Country"
           value={query.country ?? ""}
@@ -98,7 +107,7 @@ export function DirectoryFilters({ query, filterOptions, onChange, onClear }: Di
           onChange={(value) => onChange({ status: value as EmployeeListQuery["status"] })}
         />
         {hasActiveFilters(query) && (
-          <Button variant="ghost" onClick={onClear}>
+          <Button variant="ghost" onClick={onClear} className="h-10 px-2 text-sm font-medium text-primary hover:text-primary">
             Clear filters
           </Button>
         )}

@@ -9,6 +9,7 @@ import { useSyncExternalStore } from "react";
  */
 
 let params = new URLSearchParams();
+let pathname = "/employees";
 const listeners = new Set<() => void>();
 
 function subscribe(listener: () => void): () => void {
@@ -22,8 +23,9 @@ function setSearch(search: string): void {
   listeners.forEach((listener) => listener());
 }
 
-/** Sets the URL before rendering, for example `setUrl("?country=Germany")`. */
-export function setUrl(search: string): void {
+/** Sets the URL before rendering, for example `setUrl("?country=Germany")` or `setUrl("", "/insights")`. */
+export function setUrl(search: string, path = "/employees"): void {
+  pathname = path;
   setSearch(search);
   navigationLog.pushes.length = 0;
 }
@@ -42,7 +44,7 @@ export const navigationModule = {
       () => params,
       () => params,
     ),
-  usePathname: () => "/employees",
+  usePathname: () => pathname,
   useRouter: () => ({
     push: navigate,
     replace: navigate,

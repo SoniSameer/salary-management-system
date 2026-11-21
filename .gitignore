@@ -34,6 +34,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# scratch folder used by scripts/check-generate-without-env.ps1
+/.scratch-generate/
+
 # generated Prisma client (created by `prisma generate` on postinstall)
 /src/generated/
 

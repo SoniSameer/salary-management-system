@@ -64,7 +64,7 @@ export function EmployeeDirectory() {
           <p role="status" className="sr-only">
             Loading employees…
           </p>
-          <EmployeeTable query={query} busy onSort={(field) => navigate(toggleSort(query, field))} />
+          <EmployeeTable query={query} busy search={query.search} onSort={(field) => navigate(toggleSort(query, field))} />
         </>
       ) : data.items.length === 0 ? (
         <EmptyState
@@ -81,6 +81,7 @@ export function EmployeeDirectory() {
             employees={data.items}
             query={query}
             busy={list.isLoading}
+            search={query.search}
             onSort={(field) => navigate(toggleSort(query, field))}
           />
           <Pagination

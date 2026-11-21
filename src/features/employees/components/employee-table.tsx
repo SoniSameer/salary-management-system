@@ -7,6 +7,13 @@ import type { EmployeeDto } from "../api-client";
 import { COLUMNS, type Column } from "../employee-columns";
 import { LoadingRows } from "./directory-states";
 
+function highlight(text: string, search: string): React.ReactNode {
+  const term = search.trim();
+  if (term.length < 2) return text;
+  const parts = text.split(new RegExp(`(${term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "gi"));
+  return parts.map((part, index) => part.toLowerCase() === term.toLowerCase() ? <mark key={index} className="bg-primary/15 text-inherit rounded px-0.5">{part}</mark> : part);
+}
+
 interface EmployeeTableProps {
   /** Rows to show. Omit to show loading placeholders instead. */
   employees?: EmployeeDto[];
@@ -14,6 +21,7 @@ interface EmployeeTableProps {
   /** True while a new page is loading. Rows stay visible but are marked busy. */
   busy: boolean;
   onSort: (field: EmployeeSortField) => void;
+  search?: string;
 }
 
 function ariaSort(query: EmployeeListQuery, field?: EmployeeSortField) {
@@ -30,7 +38,7 @@ function initials(name: string): string {
     .join("");
 }
 
-export function EmployeeTable({ employees, query, busy, onSort }: EmployeeTableProps) {
+export function EmployeeTable({ employees, query, busy, onSort, search }: EmployeeTableProps) {
   return (
     <div className="surface-card overflow-hidden">
       <Table aria-label="Employees" aria-busy={busy} className="min-w-[1040px] lg:min-w-0">
@@ -57,7 +65,7 @@ export function EmployeeTable({ employees, query, busy, onSort }: EmployeeTableP
         {employees ? (
           <TableBody className={busy ? "opacity-60 transition-opacity" : undefined}>
             {employees.map((employee) => (
-              <EmployeeRow key={employee.id} employee={employee} />
+              <EmployeeRow key={employee.id} employee={employee} search={search} />
             ))}
           </TableBody>
         ) : (
@@ -94,7 +102,7 @@ function SortButton({
   );
 }
 
-function EmployeeRow({ employee }: { employee: EmployeeDto }) {
+function EmployeeRow({ employee, search }: { employee: EmployeeDto; search?: string }) {
   return (
     <TableRow className="group min-h-16 hover:bg-accent/45">
       <TableCell className="px-4 py-3 sm:px-5">
@@ -104,9 +112,9 @@ function EmployeeRow({ employee }: { employee: EmployeeDto }) {
           </span>
           <div className="min-w-0">
             <Link href={`/employees/${employee.id}`} className="cursor-pointer text-primary hover:text-primary focus-visible:ring-ring rounded-md font-medium hover:underline focus-visible:ring-2 focus-visible:outline-none" title="View profile and salary history">
-              {employee.fullName}
+              {highlight(employee.fullName, search ?? "")}
             </Link>
-            <div className="text-muted-foreground truncate text-xs">{employee.email}</div>
+            <div className="text-muted-foreground truncate text-xs">{highlight(employee.email, search ?? "")}</div>
           </div>
         </div>
       </TableCell>

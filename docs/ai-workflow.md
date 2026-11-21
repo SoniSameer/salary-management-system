@@ -27,6 +27,11 @@ How AI was used to build this project, and where the human decisions were made.
 
 Notes are added here as the project progresses.
 
+- Task 8: I did not add `react-hook-form`. The form has eight fields, so plain state plus the server's own Zod schemas is enough, and the form and the API cannot disagree about what is valid. The schemas now carry plain-language messages ("Enter a valid email address") instead of Zod's defaults, which also improves the API's error responses.
+- Task 8: A test run against code I had just edited in the same step reported stale results twice. I now write files, then run checks as a separate step. When a result looks too good, I rerun it.
+- Task 8: Real-browser checks run against the TEST database through `scripts/serve-test-db.ps1`, so creating sample employees never adds rows to the demo data. A one-time 3 minute tool timeout could not be reproduced (typecheck 6s, lint 10s, tests 3s) and was treated as a tool stall.
+- Task 8: The deactivate dialog states that deactivation cannot be undone in this version. Reactivation is not in the requirements, so I did not build it. It is listed as a possible follow-up.
+- Task 8: Components that are only reachable by a mouse click (the dialog's trigger and focus handling) are covered by React Testing Library tests with real keyboard events (Escape, Enter), not by a screenshot.
 - Task 7: I wrote a Server Component page that rendered a client table with click handlers as its loading placeholder. Functions cannot cross from server to client, so I caught this in review before running it and replaced it with a handler-free `DirectoryFallback` built from the same column definitions.
 - Task 7: A component test found a real UI bug: with filters hiding everyone, two buttons both named "Clear filters" appeared (filter bar and empty state). I renamed the empty-state action to "Show all employees".
 - Task 7: Unit tests with mocks could not show a visual problem. A headless Edge screenshot of the production build showed text rendered in a serif font. The shadcn setup had written `--font-sans: var(--font-sans)`, a variable that points at itself. I pointed it at `--font-geist-sans` and re-checked with another screenshot.

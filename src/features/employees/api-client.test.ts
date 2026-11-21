@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   ApiRequestError,
+  changeSalary,
   createEmployee,
   deactivateEmployee,
   fetchEmployeeDetails,
@@ -210,6 +211,41 @@ describe("fetchEmployeeDetails", () => {
     respondWith({ error: { code: "not_found", message: "Employee not found" } }, { status: 404 });
 
     await expect(fetchEmployeeDetails(EMPLOYEE.id)).rejects.toMatchObject({ status: 404 });
+  });
+});
+
+describe("changeSalary", () => {
+  it("posts the new salary and reason, and returns the updated employee and new record", async () => {
+    const record = {
+      id: "r1",
+      employeeId: EMPLOYEE.id,
+      amount: 78000,
+      currency: "EUR",
+      effectiveAt: "2026-05-20T09:30:00.000Z",
+      reason: "Promotion",
+    };
+    const fetchMock = respondWith({ employee: { ...EMPLOYEE, currentSalary: 78000 }, record }, { status: 201 });
+
+    const result = await changeSalary(EMPLOYEE.id, { salary: 78000, reason: "Promotion" });
+
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe(`/api/employees/${EMPLOYEE.id}/salary`);
+    expect(init).toMatchObject({ method: "POST" });
+    expect(JSON.parse(init.body)).toEqual({ salary: 78000, reason: "Promotion" });
+    expect(result.employee.currentSalary).toBe(78000);
+    expect(result.record.reason).toBe("Promotion");
+  });
+
+  it("exposes the API's code so the caller can react to a conflict", async () => {
+    respondWith(
+      { error: { code: "salary_changed_concurrently", message: "This employee was changed by someone else. Reload and try again" } },
+      { status: 409 },
+    );
+
+    await expect(changeSalary(EMPLOYEE.id, { salary: 1 })).rejects.toMatchObject({
+      status: 409,
+      code: "salary_changed_concurrently",
+    });
   });
 });
 

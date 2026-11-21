@@ -8,6 +8,10 @@ import { GET as insights } from "./route";
 
 let repository: InMemoryInsightsRepository;
 
+// connection() only works inside a real Next.js request. The handlers are called directly here,
+// and the order "wait for a request, then query" is covered in request-time-routes.test.ts.
+vi.mock("next/server", () => ({ connection: async () => {} }));
+
 // The handlers get their service from the container. Swap in one that uses the
 // in-memory repository so these tests need no database.
 vi.mock("@/server/container", () => ({

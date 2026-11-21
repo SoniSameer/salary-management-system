@@ -12,6 +12,10 @@ import { GET as list, POST as create } from "./route";
 let service: EmployeeService;
 let salaryService: SalaryService;
 
+// connection() only works inside a real Next.js request. The handlers are called directly here,
+// and the order "wait for a request, then query" is covered in request-time-routes.test.ts.
+vi.mock("next/server", () => ({ connection: async () => {} }));
+
 // The handlers get their services from the container. Swap in ones that use
 // the in-memory repository so these tests need no database.
 vi.mock("@/server/container", () => ({

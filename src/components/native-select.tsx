@@ -13,8 +13,8 @@ interface NativeSelectProps {
   value: string;
   options: SelectOption[];
   onChange: (value: string) => void;
-  disabled?: boolean;
-  className?: string;
+  /** Text shown when no value has been selected yet. */
+  placeholder?: string;
 }
 
 /**
@@ -22,13 +22,14 @@ interface NativeSelectProps {
  * do not allow reliable CSS cursor styling for their option rows, so the listbox
  * is rendered in the app while preserving the labelled-control contract.
  */
-export function NativeSelect({ label, value, options, onChange, disabled, className }: NativeSelectProps) {
+export function NativeSelect({ label, value, options, onChange, disabled, className, placeholder = "Select an option" }: NativeSelectProps) {
   const generatedId = useId();
   const id = `select-${label.toLowerCase().replace(/\s+/g, "-")}`;
   const listboxId = `${id}-options-${generatedId.replace(/:/g, "")}`;
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const selected = options.find((option) => option.value === value) ?? options[0];
+  const selected = options.find((option) => option.value === value);
+  const displayLabel = selected?.label ?? (value ? value : placeholder);
 
   useEffect(() => {
     function close(event: MouseEvent) {
@@ -80,7 +81,7 @@ export function NativeSelect({ label, value, options, onChange, disabled, classN
         onKeyDown={handleKeyDown}
         className="border-input bg-background text-foreground focus-visible:border-ring focus-visible:ring-ring/30 flex h-10 w-full cursor-pointer items-center justify-between rounded-lg border px-3 pr-3 text-left text-sm shadow-sm outline-none transition-[border-color,box-shadow] duration-150 focus-visible:ring-3 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        <span className="truncate">{selected?.label ?? ""}</span>
+        <span className={`truncate ${selected ? "" : "text-muted-foreground"}`}>{displayLabel}</span>
         <svg aria-hidden="true" viewBox="0 0 20 20" className={`text-muted-foreground ml-2 size-4 shrink-0 transition-transform duration-150 ${open ? "rotate-180" : ""}`} fill="none" stroke="currentColor" strokeWidth="1.7">
           <path d="m5 7 5 5 5-5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>

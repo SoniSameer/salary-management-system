@@ -10,6 +10,7 @@ interface TextFieldProps {
   hint?: string;
   /** Use the shared custom listbox instead of a free-text datalist. */
   selectOptions?: SelectOption[];
+  selectPlaceholder?: string;
   type?: "text" | "email" | "date";
   inputMode?: "numeric" | "text";
   autoComplete?: string;
@@ -25,6 +26,7 @@ export function TextField({
   error,
   hint,
   selectOptions,
+  selectPlaceholder,
   type = "text",
   inputMode,
   autoComplete = "off",
@@ -37,7 +39,7 @@ export function TextField({
   return (
     <div className="flex flex-col gap-1">
       {selectOptions ? (
-        <NativeSelect label={label} value={value} options={selectOptions} onChange={onChange} />
+        <NativeSelect label={label} value={value} options={selectOptions} placeholder={selectPlaceholder} onChange={onChange} />
       ) : (
         <>
           <label htmlFor={name} className="text-sm font-medium">

@@ -4,24 +4,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { EmployeeListQuery, EmployeeSortField } from "@/server/employees/employee-list";
 import { formatDate, formatMoney } from "@/lib/format";
 import type { EmployeeDto } from "../api-client";
+import { COLUMNS, type Column } from "../employee-columns";
 import { LoadingRows } from "./directory-states";
-
-interface Column {
-  label: string;
-  /** Present only for columns the API can sort by. */
-  sortField?: EmployeeSortField;
-  align?: "right";
-}
-
-const COLUMNS: Column[] = [
-  { label: "Name", sortField: "fullName" },
-  { label: "Country", sortField: "country" },
-  { label: "Department", sortField: "department" },
-  { label: "Job title", sortField: "jobTitle" },
-  { label: "Hired", sortField: "hiredAt" },
-  { label: "Salary", sortField: "currentSalary", align: "right" },
-  { label: "Status" },
-];
 
 interface EmployeeTableProps {
   /** Rows to show. Omit to show loading placeholders instead. */

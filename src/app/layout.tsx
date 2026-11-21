@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
+import { DemoBanner } from "@/components/demo-banner";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,6 +33,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         >
           Skip to main content
         </a>
+        <DemoBanner />
         <header className="border-b">
           <div className="mx-auto flex max-w-7xl items-center gap-8 px-6 py-3">
             <Link href="/employees" className="font-semibold tracking-tight">

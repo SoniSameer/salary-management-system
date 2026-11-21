@@ -3,9 +3,19 @@ import { z } from "zod";
 // Fits PostgreSQL's 4-byte integer column with a wide margin.
 export const MAX_SALARY = 1_000_000_000;
 
-const requiredText = (max: number) => z.string().trim().min(1).max(max);
+// Messages are shown to the HR manager in the form and in API responses.
+const requiredText = (max: number) =>
+  z
+    .string()
+    .trim()
+    .min(1, "This field is required")
+    .max(max, `Use ${max} characters or fewer`);
 
-const emailSchema = z.string().trim().toLowerCase().pipe(z.email().max(254));
+const emailSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email("Enter a valid email address").max(254, "Use 254 characters or fewer"));
 
 const currencySchema = z
   .string()
@@ -13,10 +23,16 @@ const currencySchema = z
   .toUpperCase()
   .regex(/^[A-Z]{3}$/, "Use a 3-letter ISO currency code, for example USD");
 
-const salarySchema = z.number().int().positive().max(MAX_SALARY);
+export const salarySchema = z
+  .number("Enter a salary")
+  .int("Use a whole number")
+  .positive("Enter a salary above zero")
+  .max(MAX_SALARY, "That amount is too large");
 
 // "2024-01-15" becomes midnight UTC, matching how the database stores dates.
-const dateSchema = z.iso.date().transform((value) => new Date(`${value}T00:00:00.000Z`));
+const dateSchema = z.iso
+  .date("Enter a valid date")
+  .transform((value) => new Date(`${value}T00:00:00.000Z`));
 
 const profileFields = {
   fullName: requiredText(120),

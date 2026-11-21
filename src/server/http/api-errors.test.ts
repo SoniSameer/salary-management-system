@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { notFound } from "next/navigation";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import {
@@ -62,6 +63,22 @@ describe("toErrorResponse", () => {
 
     expect(response.status).toBe(409);
     expect(await readJson(response)).toMatchObject({ error: { code } });
+  });
+
+  it("lets Next.js's own control-flow errors through instead of turning them into a 500", () => {
+    // notFound() works by throwing an internal error that the framework must receive.
+    // Request-time bail-outs while building a route use the same mechanism.
+    let frameworkError: unknown;
+    try {
+      notFound();
+    } catch (error) {
+      frameworkError = error;
+    }
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    expect(() => toErrorResponse(frameworkError)).toThrow(frameworkError as Error);
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
   });
 
   it("hides the details of unexpected errors", async () => {

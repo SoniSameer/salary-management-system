@@ -1,17 +1,19 @@
 import { z } from "zod";
-import { MAX_SALARY } from "./employee-schemas";
+import { salarySchema } from "./employee-schemas";
 
 /**
  * Body of a salary change. Currency and effective date are deliberately not
  * accepted: the currency is the employee's own, and the change takes effect now.
  */
+export const MAX_REASON_LENGTH = 200;
+
 export const changeSalarySchema = z.strictObject({
   /** New annual salary in whole currency units. */
-  salary: z.number().int().positive().max(MAX_SALARY),
+  salary: salarySchema,
   reason: z
     .string()
     .trim()
-    .max(200)
+    .max(MAX_REASON_LENGTH, `Use ${MAX_REASON_LENGTH} characters or fewer`)
     .optional()
     .transform((value) => (value ? value : undefined)),
 });

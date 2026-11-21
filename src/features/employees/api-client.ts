@@ -136,6 +136,21 @@ export function updateEmployee(id: string, patch: EmployeePatchPayload): Promise
   return request<EmployeeDto>(`/api/employees/${id}`, sendJson("PATCH", patch));
 }
 
+export interface SalaryChangePayload {
+  /** New annual salary in the employee's own currency. */
+  salary: number;
+  reason?: string;
+}
+
+export interface SalaryChangeResultDto {
+  employee: EmployeeDto;
+  record: SalaryRecordDto;
+}
+
+export function changeSalary(id: string, payload: SalaryChangePayload): Promise<SalaryChangeResultDto> {
+  return request<SalaryChangeResultDto>(`/api/employees/${id}/salary`, sendJson("POST", payload));
+}
+
 export function deactivateEmployee(id: string): Promise<EmployeeDto> {
   return request<EmployeeDto>(`/api/employees/${id}/deactivate`, sendJson("POST"));
 }

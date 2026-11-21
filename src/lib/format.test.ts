@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDate, formatMoney, formatNumber } from "./format";
+import { formatCompactMoney, formatDate, formatMoney, formatNumber } from "./format";
 
 describe("formatMoney", () => {
   it.each([
@@ -26,6 +26,23 @@ describe("formatMoney", () => {
 
   it("falls back for a malformed currency code instead of throwing", () => {
     expect(formatMoney(5000, "not-a-code")).toBe("not-a-code 5,000");
+  });
+});
+
+describe("formatCompactMoney", () => {
+  it.each([
+    [40000, "EUR", "€40K"],
+    [2500, "USD", "$2.5K"],
+    [1200000, "USD", "$1.2M"],
+    [8000000, "JPY", "¥8M"],
+    [2000000, "INR", "₹2M"],
+    [999, "GBP", "£999"],
+  ])("formats %s %s as %s", (amount, currency, expected) => {
+    expect(formatCompactMoney(amount, currency)).toBe(expected);
+  });
+
+  it("falls back for a malformed currency code instead of throwing", () => {
+    expect(formatCompactMoney(5000, "not-a-code")).toBe("not-a-code 5K");
   });
 });
 

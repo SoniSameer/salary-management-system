@@ -27,6 +27,10 @@ How AI was used to build this project, and where the human decisions were made.
 
 Notes are added here as the project progresses.
 
+- Task 9: Salary history deltas are computed only between two records in the same currency. A unit test pins this: if two adjacent records had different currencies, no change is shown, because amounts in different currencies are never subtracted or compared. The sign is part of the text (`+€8,000 (+11.4%)`), not only a colour.
+- Task 9: After a salary change the API already returns the updated employee and the new record, so the page updates in place and the details are fetched once. A test asserts the single fetch. I considered refetching after each change, but it would flash the whole page into a loading state.
+- Task 9: Typecheck caught a typing error in my own test helper (a parameter type inferred from its default value). My command chain committed before reading the failure, so I fixed it in a follow-up commit. Checks now run and are read before any commit step.
+- Task 9: The real-browser check created an employee with a raise and a cut on the same day. The cut correctly appears above the raise, which confirms that the history ordering tiebreak (creation time after effective date) works on real PostgreSQL.
 - Task 8: I did not add `react-hook-form`. The form has eight fields, so plain state plus the server's own Zod schemas is enough, and the form and the API cannot disagree about what is valid. The schemas now carry plain-language messages ("Enter a valid email address") instead of Zod's defaults, which also improves the API's error responses.
 - Task 8: A test run against code I had just edited in the same step reported stale results twice. I now write files, then run checks as a separate step. When a result looks too good, I rerun it.
 - Task 8: Real-browser checks run against the TEST database through `scripts/serve-test-db.ps1`, so creating sample employees never adds rows to the demo data. A one-time 3 minute tool timeout could not be reproduced (typecheck 6s, lint 10s, tests 3s) and was treated as a tool stall.

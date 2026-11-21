@@ -72,5 +72,4 @@ Notes are added here as the project progresses.
 
 ## Key prompts
 
-- Planning: "Go through the assessment document and guide me on the best way to build it", followed by scoped clarifying questions.
 - Rules: the engineering instructions in `AGENTS.md`, supplied up front so every task follows the same standards.

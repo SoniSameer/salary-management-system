@@ -6,17 +6,17 @@ A web app for an HR Manager to manage salaries for an organization of 10,000 emp
 
 - **Live demo:** https://salary-management-system-beta.vercel.app/employees
 - **Demo video:** _record separately before submitting_
+- **Current screenshots:** [latest UX screenshots](docs/screenshots/latest/)
+- **Design notes:** [DESIGN_NOTES.md](DESIGN_NOTES.md)
 - **Requirements and scope:** [docs/requirements.md](docs/requirements.md)
 - **Design and architecture:** [docs/design.md](docs/design.md)
 - **Trade-offs and deliberate omissions:** [docs/tradeoffs.md](docs/tradeoffs.md)
 - **Performance considerations:** [docs/performance.md](docs/performance.md)
 - **How AI was used, and what I corrected:** [docs/ai-workflow.md](docs/ai-workflow.md)
 
-| Employee directory | Employee details and salary history |
+| Employees directory | Insights dashboard |
 |---|---|
-| ![Employee directory with filters, sorting and paging](docs/screenshots/directory.png) | ![Employee details with salary history](docs/screenshots/employee-details.png) |
-
-![Salary insights dashboard in euros](docs/screenshots/insights.png)
+| ![Latest employee directory with live search, filters and status pills](docs/screenshots/latest/employees.png) | ![Latest salary insights dashboard with currency selector and chart](docs/screenshots/latest/insights.png) |
 
 ## What it does
 

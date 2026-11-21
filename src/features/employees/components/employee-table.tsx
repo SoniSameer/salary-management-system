@@ -35,6 +35,8 @@ export function EmployeeTable({ employees, query, busy, onSort }: EmployeeTableP
             >
               {column.sortField ? (
                 <SortButton column={column} query={query} onSort={onSort} />
+              ) : column.visuallyHidden ? (
+                <span className="sr-only">{column.label}</span>
               ) : (
                 column.label
               )}
@@ -102,6 +104,16 @@ function EmployeeRow({ employee }: { employee: EmployeeDto }) {
         <Badge variant={employee.isActive ? "secondary" : "outline"}>
           {employee.isActive ? "Active" : "Inactive"}
         </Badge>
+      </TableCell>
+      <TableCell className="text-right">
+        {/* The name is in the label so a screen reader hears which row each link belongs to. */}
+        <Link
+          href={`/employees/${employee.id}/edit`}
+          aria-label={`Edit ${employee.fullName}`}
+          className="text-sm hover:underline"
+        >
+          Edit
+        </Link>
       </TableCell>
     </TableRow>
   );

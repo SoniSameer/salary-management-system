@@ -17,7 +17,7 @@ export function DirectoryFallback() {
           <TableRow>
             {COLUMNS.map((column) => (
               <TableHead key={column.label} scope="col" className={column.align === "right" ? "text-right" : undefined}>
-                {column.label}
+                {column.visuallyHidden ? <span className="sr-only">{column.label}</span> : column.label}
               </TableHead>
             ))}
           </TableRow>

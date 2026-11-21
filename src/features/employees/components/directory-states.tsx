@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { COLUMNS } from "../employee-columns";
 
 const SKELETON_ROWS = 8;
-const SKELETON_COLUMNS = 7;
+const SKELETON_COLUMNS = COLUMNS.length;
 
 /** Placeholder rows shown while the first page loads. Hidden from screen readers. */
 export function LoadingRows() {
